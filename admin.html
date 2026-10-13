@@ -250,29 +250,37 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   const STORE_INFO = {
-    '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta'},
-    '2039': {name:'Simanjuntak',        city:'Yogyakarta',  region:'Yogyakarta'},
-    '2070': {name:'Cokroaminoto',       city:'Yogyakarta',  region:'Yogyakarta'},
-    '2118': {name:'Taman Siswa',        city:'Yogyakarta',  region:'Yogyakarta'},
-    '2410': {name:'Parangtritis',       city:'Yogyakarta',  region:'Yogyakarta'},
-    '2494': {name:'Colombo',            city:'Yogyakarta',  region:'Yogyakarta'},
-    '7051': {name:'Godean',             city:'Yogyakarta',  region:'Yogyakarta'},
-    '2319': {name:'Jl. Magelang',       city:'Sleman',      region:'Yogyakarta'},
-    '2278': {name:'Jend. Sudirman',     city:'Bantul',      region:'Yogyakarta'},
-    '2053': {name:'Slamet Riyadi',      city:'Solo',        region:'Solo Raya'},
-    '7014': {name:'Soekarno Solo Baru', city:'Sukoharjo',   region:'Solo Raya'},
-    '2299': {name:'A. Yani Kartasura',  city:'Sukoharjo',   region:'Solo Raya'},
-    '2306': {name:'Lawu Cerbonan',      city:'Karanganyar', region:'Solo Raya'},
-    '2424': {name:'Sukowati',           city:'Sragen',      region:'Solo Raya'},
-    '2327': {name:'Sukorejo',           city:'Wonogiri',    region:'Solo Raya'},
-    '7016': {name:'Pandanaran',         city:'Boyolali',    region:'Solo Raya'},
-    '7005': {name:'Pemuda',             city:'Klaten',      region:'Solo Raya'},
-    '7047': {name:'A. Yani',            city:'Magelang',    region:'Kedu & Kebumen'},
-    '2259': {name:'MT Haryono',         city:'Temanggung',  region:'Kedu & Kebumen'},
-    '2342': {name:'Brig. Katamso',      city:'Wonosobo',    region:'Kedu & Kebumen'},
-    '7017': {name:'Ahmad Dahlan',       city:'Purworejo',   region:'Kedu & Kebumen'},
-    '2152': {name:'Pemuda',             city:'Kebumen',     region:'Kedu & Kebumen'}
+    '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
+    '2039': {name:'Simanjuntak',        city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184246'},
+    '2070': {name:'Cokroaminoto',       city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184255'},
+    '2118': {name:'Taman Siswa',        city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184274'},
+    '2410': {name:'Parangtritis',       city:'Yogyakarta',  region:'Yogyakarta',     wa:'081120058799'},
+    '7051': {name:'Godean',             city:'Yogyakarta',  region:'Yogyakarta',     wa:'081120058797'},
+    '2494': {name:'Factory Store Colombo', city:'Yogyakarta', region:'Yogyakarta',   wa:''},
+    '2319': {name:'Jl. Magelang',       city:'Sleman',      region:'Yogyakarta',     wa:'081120027046'},
+    '2278': {name:'Jend. Sudirman',     city:'Bantul',      region:'Yogyakarta',     wa:'0811-2002-9258'},
+    '2342': {name:'Brig. Katamso',      city:'Wonosari',    region:'Yogyakarta',     wa:'6281120237504'},
+    '2053': {name:'Slamet Riyadi',      city:'Solo',        region:'Solo Raya',      wa:'08112184254'},
+    '7014': {name:'Soekarno Solo Baru', city:'Sukoharjo',   region:'Solo Raya',      wa:'81120009514'},
+    '2299': {name:'A. Yani Kartasura',  city:'Sukoharjo',   region:'Solo Raya',      wa:'081120022574'},
+    '2306': {name:'Lawu Cerbonan',      city:'Karanganyar', region:'Solo Raya',      wa:'081120027042'},
+    '2424': {name:'Sukowati',           city:'Sragen',      region:'Solo Raya',      wa:'81120060401'},
+    '2327': {name:'Sukorejo',           city:'Wonogiri',    region:'Solo Raya',      wa:'081120031473'},
+    '7016': {name:'Pandanaran',         city:'Boyolali',    region:'Solo Raya',      wa:'081120009516'},
+    '7005': {name:'Pemuda',             city:'Klaten',      region:'Solo Raya',      wa:'081121800643'},
+    '7047': {name:'A. Yani',            city:'Magelang',    region:'Kedu & Kebumen', wa:'81120041696'},
+    '2259': {name:'MT Haryono',         city:'Temanggung',  region:'Kedu & Kebumen', wa:'0811-2020-6182'},
+    '7017': {name:'Ahmad Dahlan',       city:'Purworejo',   region:'Kedu & Kebumen', wa:'081120009517'},
+    '2152': {name:'Pemuda',             city:'Kebumen',     region:'Kedu & Kebumen', wa:'6281122203018'}
   };
+  // nomor WA ditulis bebas (0811..., 811..., 62811..., pakai strip boleh), dirapikan otomatis jadi 62xxx
+  function waNumber(s){
+    let d = String(s || '').replace(/\D/g, '');
+    if(!d) return '';
+    if(d.startsWith('0')) d = '62' + d.slice(1);
+    else if(d.startsWith('8')) d = '62' + d;
+    return /^62\d{8,13}$/.test(d) ? d : '';
+  }
   const REGION_ORDER = ['Yogyakarta', 'Solo Raya', 'Kedu & Kebumen', 'Lainnya'];
   const DEFAULT_ZONES = ['Sales Area', 'Warehouse'];
   const SKIP_LOCATION = /\bBAZ\b|bazaar/i;
@@ -561,9 +569,9 @@
     const m = /^\s*(\d{3,6})\s*-\s*(.*)$/.exec(loc);
     const code = m ? m[1] : loc;
     const info = STORE_INFO[code];
-    if(info) return Object.assign({code}, info);
+    if(info) return Object.assign({code}, info, {wa: waNumber(info.wa)});
     const rest = (m ? m[2] : loc).replace(/\bEIGER\b/i, '').replace(/\b(Store|ST)\b/i, '').replace(/\s+/g, ' ').trim();
-    return {code, name: rest || code, city: '', region: 'Lainnya'};
+    return {code, name: rest || code, city: '', region: 'Lainnya', wa: ''};
   }
 
   const LETTER = ['XXS','XS','S','S/M','S-M','M','M/L','L','L/XL','L-XL','XL','XXL','2XL','XXL-XXXL','2XL/3XL','XXXL','3XL','XXXXL','4XL','XXXXXL','5XL','6XL','7XL','8XL'];
@@ -696,8 +704,8 @@
         <div class="stat"><div class="num">${fmt(stats.stores)}</div><div class="lbl">Toko</div></div>
         <div class="stat"><div class="num">${fmt(stats.qty)}</div><div class="lbl">Pcs stok promo</div></div>
         <div class="stat ${stats.noPhoto ? 'flag' : ''}"><div class="num">${fmt(stats.noPhoto)}</div><div class="lbl">Warna tanpa foto</div></div>`;
-      $('storeTbl').innerHTML = '<thead><tr><th>Toko</th><th>Kota</th><th style="text-align:right">Produk</th><th style="text-align:right">Pcs</th></tr></thead><tbody>' +
-        k.stores.map((s, i) => `<tr><td><span class="mono">${esc(s.code)}</span> ${esc(s.name)}</td><td>${esc(s.city || '-')}</td><td class="n">${fmt(stats.storeProd[i])}</td><td class="n">${fmt(stats.storeQty[i])}</td></tr>`).join('') + '</tbody>';
+      $('storeTbl').innerHTML = '<thead><tr><th>Toko</th><th>Kota</th><th>WhatsApp</th><th style="text-align:right">Produk</th><th style="text-align:right">Pcs</th></tr></thead><tbody>' +
+        k.stores.map((s, i) => `<tr><td><span class="mono">${esc(s.code)}</span> ${esc(s.name)}</td><td>${esc(s.city || '-')}</td><td class="mono">${s.wa ? esc(s.wa) : '<span style="color:#C9531F">belum ada</span>'}</td><td class="n">${fmt(stats.storeProd[i])}</td><td class="n">${fmt(stats.storeQty[i])}</td></tr>`).join('') + '</tbody>';
       $('result').classList.add('show');
       $('result').scrollIntoView({behavior: 'smooth', block: 'nearest'});
     }catch(e){
