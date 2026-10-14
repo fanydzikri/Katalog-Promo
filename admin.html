@@ -746,6 +746,7 @@
     const {c, rows} = stock;
     const stores = [], storeIdx = new Map();
     const agg = new Map();          // cs -> Map(storeIndex -> Map(size -> qty))
+    const artBy = new Map();        // cs -> Map(size -> Set(artikel 12 digit)), untuk pesan WA
     const nameFallback = new Map(); // cs -> nama dari file stok
     let skippedBaz = 0;
     rows.forEach(r => {
@@ -773,6 +774,9 @@
       let m1 = agg.get(cs); if(!m1){ m1 = new Map(); agg.set(cs, m1); }
       let m2 = m1.get(si); if(!m2){ m2 = new Map(); m1.set(si, m2); }
       m2.set(size, (m2.get(size) || 0) + qty);
+      let ab = artBy.get(cs); if(!ab){ ab = new Map(); artBy.set(cs, ab); }
+      let as = ab.get(size); if(!as){ as = new Set(); ab.set(size, as); }
+      as.add(art);
     });
     if(!agg.size) throw new Error('Tidak ada stok yang cocok dengan list promo. Pastikan file stok dan file promo benar.');
 
@@ -814,7 +818,9 @@
         byGen.set(g, prod);
       }
       if(prod.n === g && (it.n || nameFallback.get(cs))) prod.n = it.n || nameFallback.get(cs);
-      prod.c.push({k, p: it.p, d: it.d, im, sz, st, _q: colorQty});
+      const ab = artBy.get(cs) || new Map();
+      const arts = sz.map(s => [...(ab.get(s) || [])].sort().join('/'));
+      prod.c.push({k, p: it.p, d: it.d, im, sz, a: arts, st, _q: colorQty});
       prod._q += colorQty;
       prod._d = Math.max(prod._d, it.d);
     });
