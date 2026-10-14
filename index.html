@@ -583,7 +583,7 @@
 
   // ---------- pencatat klik (anonim) ----------
   // Tempel URL Web App Apps Script (berakhiran /exec) di antara tanda kutip. Kosong = pencatatan mati.
-  const TRACK_URL = '';
+  const TRACK_URL = 'https://script.google.com/macros/s/AKfycbzOA--WQt4MgQ-ODD8u6ZY5Tm57RvGWKXjQcCvfhTA9xBxLLN3BBnjzUagQBiwW946GDA/exec';
   const track = (function(){
     if(!TRACK_URL || isPreview || navigator.webdriver) return function(){};
     const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
