@@ -386,8 +386,8 @@
       <label for="storeSel" class="fb-label" style="display:block;margin-bottom:6px">Toko</label>
       <select id="storeSel"><option value="-1">Semua toko</option></select>
       <div class="links">
-      <a class="wa-btn" id="pickerWa" href="#" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg> Chat WhatsApp toko</a>
-      <a class="maps" id="pickerMaps" href="#" target="_blank" rel="noopener">
+      <a class="wa-btn" id="pickerWa" data-tr="wa" data-src="pilih-toko" href="#" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg> Chat WhatsApp toko</a>
+      <a class="maps" id="pickerMaps" data-tr="maps" data-src="pilih-toko" href="#" target="_blank" rel="noopener">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
         Lihat lokasi di Google Maps</a>
       </div>
@@ -446,7 +446,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Katalog promo toko EIGER Area Jateng 01, dikelola oleh tim toko PT. Eigerindo MPI.</span>
+    <span>Katalog promo toko EIGER Area Jateng 01, dikelola oleh tim toko PT. Eigerindo MPI. Kami mencatat klik secara anonim (tanpa nama atau nomor HP) untuk meningkatkan layanan.</span>
     <span id="footDate"></span>
   </div>
 </footer>
@@ -581,6 +581,53 @@
   const S = {store:-1, cat:'ALL', q:'', gender:new Set(), size:new Set(), disc:0, sort:'disc', shown:PAGE};
   const isPreview = new URLSearchParams(location.search).get('preview') === '1';
 
+  // ---------- pencatat klik (anonim) ----------
+  // Tempel URL Web App Apps Script (berakhiran /exec) di antara tanda kutip. Kosong = pencatatan mati.
+  const TRACK_URL = '';
+  const track = (function(){
+    if(!TRACK_URL || isPreview || navigator.webdriver) return function(){};
+    const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    let vid = '', sid = '';
+    try{ vid = localStorage.getItem('kp_vid') || ''; if(!vid){ vid = rid(); localStorage.setItem('kp_vid', vid); } }catch(e){ vid = rid(); }
+    try{ sid = sessionStorage.getItem('kp_sid') || ''; if(!sid){ sid = rid(); sessionStorage.setItem('kp_sid', sid); } }catch(e){ sid = rid(); }
+    const dev = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'hp' : 'komputer';
+    const qs = new URLSearchParams(location.search);
+    let ref = qs.get('utm_source') || qs.get('src') || '';
+    if(!ref && qs.get('toko')) ref = 'qr-toko';
+    if(!ref && /^#p=/.test(location.hash)) ref = 'link-produk';
+    if(!ref){ try{ ref = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '') : 'langsung'; }catch(e){ ref = 'langsung'; } }
+    if(/(^|\.)(l\.)?(facebook|instagram|whatsapp|wa|t)\.(com|me)$/.test(ref)) ref = ref.replace(/^l\./, '');
+    let q = [], timer = null;
+    function send(){
+      clearTimeout(timer);
+      if(!q.length) return;
+      const body = JSON.stringify({v: vid, s: sid, dev, ref, e: q.splice(0, 50)});
+      try{ if(navigator.sendBeacon && navigator.sendBeacon(TRACK_URL, body)) return; }catch(e){}
+      try{ fetch(TRACK_URL, {method: 'POST', mode: 'no-cors', keepalive: true, body}).catch(() => {}); }catch(e){}
+    }
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') send(); });
+    window.addEventListener('pagehide', send);
+    return function(t, o, now){
+      q.push(Object.assign({t}, o || {}));
+      if(now || q.length >= 20) send();
+      else { clearTimeout(timer); timer = setTimeout(send, 4000); }
+    };
+  })();
+  function storeInfo(si){ const s = D && D.stores[si]; return s ? {sc: s.code, sn: s.name + (s.city ? ' ' + s.city : '')} : {}; }
+  function productInfo(){
+    if(!cur) return {};
+    const c = cur.p.colors[cur.ci];
+    return {g: cur.p.g, k: c.k, n: cur.p.n, z: cur.size || '', p: c.net, d: c.d};
+  }
+  // klik WA dan lokasi dicatat dari atribut data-tr pada link
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[data-tr]');
+    if(!a) return;
+    const si = Number(a.dataset.si);
+    const o = Object.assign({src: a.dataset.src || ''}, storeInfo(si), a.dataset.src === 'pilih-toko' ? {} : productInfo());
+    track(a.dataset.tr, o, true);
+  }, true);
+
   function prepare(){
     BASES = Array.isArray(D.bases) && D.bases.length ? D.bases : BASES;
     P = D.items.map((it, idx) => {
@@ -663,6 +710,7 @@
     renderSizes(sCount);
 
     const list = base.filter(x => matches(x.p, x.v)).sort(sorter);
+    lastCount = list.length;
     const where = S.store >= 0 ? ' di toko <strong>' + esc(storeLabel(S.store)) + '</strong>' : ' di semua toko';
     $('resultTxt').innerHTML = `<strong>${list.length.toLocaleString('id-ID')}</strong> produk${where}`;
     $('resetBtn').hidden = !(S.q || S.gender.size || S.size.size || S.disc || S.cat !== 'ALL');
@@ -791,6 +839,7 @@
     dlg.querySelector('.pd-right').scrollTop = 0;
     dlg.querySelector('.pd-left').scrollTop = 0;
     if(push !== false) history.replaceState(null, '', '#p=' + p.g + '-' + p.colors[ci].k);
+    track('view', Object.assign({src: push === false ? 'link' : 'katalog'}, storeInfo(S.store), productInfo()));
   }
 
   function drawProduct(){
@@ -848,8 +897,8 @@
   }
   function storeRow(c, row, mine){
     const si = row[0], s = D.stores[si];
-    const wa = s.wa ? `<a class="wa-btn" href="${esc(waUrl(s.wa, waProductText(si)))}" target="_blank" rel="noopener" aria-label="Chat WhatsApp ${esc(s.name)}">${WA_ICON}Chat</a>` : '';
-    return `<div class="srow${mine ? ' mine' : ''}"><div class="srow-h"><span><b>${esc(s.name)}</b> <small>${esc(s.city || '')}</small></span><span class="srow-act"><a href="${mapsUrl(si)}" target="_blank" rel="noopener">Lokasi</a>${wa}</span></div><div class="sizes">${sizeChips(c, row)}</div></div>`;
+    const wa = s.wa ? `<a class="wa-btn" data-tr="wa" data-si="${si}" data-src="${mine ? 'toko-pilihan' : 'daftar-toko'}" href="${esc(waUrl(s.wa, waProductText(si)))}" target="_blank" rel="noopener" aria-label="Chat WhatsApp ${esc(s.name)}">${WA_ICON}Chat</a>` : '';
+    return `<div class="srow${mine ? ' mine' : ''}"><div class="srow-h"><span><b>${esc(s.name)}</b> <small>${esc(s.city || '')}</small></span><span class="srow-act"><a data-tr="maps" data-si="${si}" data-src="daftar-toko" href="${mapsUrl(si)}" target="_blank" rel="noopener">Lokasi</a>${wa}</span></div><div class="sizes">${sizeChips(c, row)}</div></div>`;
   }
   function drawStores(){
     const c = cur.p.colors[cur.ci];
@@ -882,9 +931,9 @@
     const row = S.store >= 0 ? c.st.find(r => r[0] === S.store && r.slice(1).some(q => q > 0)) : null;
     const s = S.store >= 0 ? D.stores[S.store] : null;
     if(row && s.wa){
-      main = `<a class="wa-big" href="${esc(waUrl(s.wa, waProductText(S.store)))}" target="_blank" rel="noopener">${WA_ICON}<span>Tanya stok di ${esc(s.name)}</span></a>`;
+      main = `<a class="wa-big" data-tr="wa" data-si="${S.store}" data-src="tombol-bawah" href="${esc(waUrl(s.wa, waProductText(S.store)))}" target="_blank" rel="noopener">${WA_ICON}<span>Tanya stok di ${esc(s.name)}</span></a>`;
     }else if(row){
-      main = `<a class="wa-big" href="${mapsUrl(S.store)}" target="_blank" rel="noopener">Lihat lokasi ${esc(s.name)}</a>`;
+      main = `<a class="wa-big" data-tr="maps" data-si="${S.store}" data-src="tombol-bawah" href="${mapsUrl(S.store)}" target="_blank" rel="noopener">Lihat lokasi ${esc(s.name)}</a>`;
     }else{
       main = `<span class="hint">Tekan <b>Chat</b> di toko yang kamu tuju untuk tanya stok lewat WhatsApp.</span>`;
     }
@@ -897,6 +946,7 @@
     const url = productUrl(cur.p, c);
     const text = `${cur.p.n} diskon ${c.d}%, jadi ${rp(c.net)}`;
     try{
+      track('share', productInfo(), true);
       if(navigator.share){ await navigator.share({title: cur.p.n, text, url}); return; }
       await navigator.clipboard.writeText(text + '\n' + url);
       toast('Link produk disalin');
@@ -969,7 +1019,7 @@
     $('storeChip').classList.toggle('set', has);
     const m = $('pickerMaps');
     m.classList.toggle('show', has);
-    if(has) m.href = mapsUrl(si);
+    if(has){ m.href = mapsUrl(si); m.dataset.si = si; $('pickerWa').dataset.si = si; }
     const w = $('pickerWa'), wa = has ? D.stores[si].wa : '';
     w.classList.toggle('show', !!wa);
     if(wa) w.href = waUrl(wa, waStoreText(si));
@@ -989,14 +1039,18 @@
   }
 
   // ---------- events ----------
-  $('storeSel').addEventListener('change', e => setStore(Number(e.target.value), true));
+  $('storeSel').addEventListener('change', e => { setStore(Number(e.target.value), true); if(S.store >= 0) track('store', storeInfo(S.store)); });
   $('storeChip').addEventListener('click', () => {
     $('picker').scrollIntoView({behavior: 'smooth', block: 'center'});
     setTimeout(() => $('storeSel').focus({preventScroll: true}), 350);
   });
   $('tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if(!t) return; S.cat = t.dataset.cat; S.shown = PAGE; render(); });
-  let qT = null;
-  $('q').addEventListener('input', e => { clearTimeout(qT); qT = setTimeout(() => { S.q = e.target.value.trim().toLowerCase(); S.shown = PAGE; render(); }, 160); });
+  let qT = null, sT = null, lastQ = '', lastCount = 0;
+  $('q').addEventListener('input', e => {
+    clearTimeout(qT); clearTimeout(sT);
+    qT = setTimeout(() => { S.q = e.target.value.trim().toLowerCase(); S.shown = PAGE; render(); }, 160);
+    sT = setTimeout(() => { if(S.q.length >= 2 && S.q !== lastQ){ lastQ = S.q; track('search', Object.assign({q: S.q, r: lastCount}, storeInfo(S.store))); } }, 1500);
+  });
   $('segDisc').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
     S.disc = Number(b.dataset.v); S.shown = PAGE;
@@ -1069,7 +1123,7 @@
         $('previewBar').hidden = false;
         if(!D) throw new Error('Data pratinjau tidak ditemukan. Buat ulang katalog di halaman admin.');
       }else{
-        const res = await fetch('katalog.json?t=' + Math.floor(Date.now() / 300000), {cache: 'no-cache'});
+        const res = await fetch('katalog.json?t=' + Math.floor(Date.now() / 60000), {cache: 'no-cache'});
         if(!res.ok) throw new Error('katalog.json belum tersedia');
         D = await res.json();
       }
@@ -1096,6 +1150,7 @@
     const qs = new URLSearchParams(location.search).get('toko');
     if(qs){ const k = D.stores.findIndex(s => s.code === qs); if(k >= 0) si = k; }
     setStore(si, false);
+    track('visit', storeInfo(si));
     openFromHash();
   }
   window.addEventListener('hashchange', () => { if(D) openFromHash(); });
