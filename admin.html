@@ -211,6 +211,11 @@
 
 <main class="wrap">
 
+  <div class="status err" id="staleBanner" hidden style="align-items:center;flex-wrap:wrap;margin-bottom:16px">
+    <span style="flex:1;min-width:240px"><b>Halaman admin ini versi lama</b> (masih tersimpan di cache browser). Katalog yang dibuat dari halaman ini tidak memuat fitur terbaru.</span>
+    <button class="btn orange" type="button" id="staleReload">Muat versi terbaru</button>
+  </div>
+
   <div class="tabs" role="tablist">
     <button type="button" class="tab" role="tab" id="tabUpd" aria-selected="true" aria-controls="panelUpdate">Update katalog</button>
     <button type="button" class="tab" role="tab" id="tabAn" aria-selected="false" aria-controls="panelAnalisa">Analisa pengunjung</button>
@@ -381,7 +386,7 @@
 
 </main>
 
-<footer><div class="wrap">Dibuat oleh <strong>Fany Dzikri Hakim</strong> untuk tim toko PT. Eigerindo MPI Area Jateng 01.</div></footer>
+<footer><div class="wrap">Dibuat oleh <strong>Fany Dzikri Hakim</strong> untuk tim toko PT. Eigerindo MPI Area Jateng 01. <span class="mono" id="verTxt"></span></div></footer>
 
 <script>
 (function(){
@@ -389,6 +394,9 @@
 
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
+  // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
+  const ADMIN_VERSION = '2026-10-14c';
+
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
     '2039': {name:'Simanjuntak',        city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184246'},
@@ -838,6 +846,7 @@
         stockDate: $('stockDate').value || today(),
         generated: new Date().toISOString(),
         promo: {title: promoDB.title || '', period: promoDB.period || ''},
+        adminVersion: ADMIN_VERSION,
         bases,
         stores: storesOut,
         items
@@ -989,7 +998,9 @@
         photo: (k.items || []).reduce((a, it) => a + it.c.filter(c => c.im && c.im.length).length, 0),
         colors: (k.items || []).reduce((a, it) => a + it.c.length, 0)};
       const gen = k.generated ? new Date(k.generated).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'}) : '-';
-      $('live').innerHTML = `<span>Katalog tayang: <b>stok per ${esc(tglID(k.stockDate))}</b></span><span><b>${fmt(liveInfo.items)}</b> produk</span><span>foto <b>${fmt(liveInfo.photo)}/${fmt(liveInfo.colors)}</b> warna</span><span>diterbitkan ${esc(gen)} WIB</span>`;
+      const oldKat = !k.adminVersion || k.adminVersion < ADMIN_VERSION;
+      $('live').innerHTML = (oldKat ? `<span style="color:var(--orange-deep);font-weight:700;flex-basis:100%">Katalog tayang dibuat dengan admin versi lama. Upload stok lalu klik Buat &amp; terbitkan supaya fitur terbaru (nomor artikel 12 digit di WA) ikut tayang.</span>` : '') +
+        `<span>Katalog tayang: <b>stok per ${esc(tglID(k.stockDate))}</b></span><span><b>${fmt(liveInfo.items)}</b> produk</span><span>foto <b>${fmt(liveInfo.photo)}/${fmt(liveInfo.colors)}</b> warna</span><span>diterbitkan ${esc(gen)} WIB</span>`;
     }catch(e){
       $('live').innerHTML = '<span>Katalog tayang belum terbaca.</span>';
     }
@@ -1100,10 +1111,20 @@
   if(typeof XLSX === 'undefined'){
     document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="status err"><b>Library Excel gagal dimuat.</b> Periksa koneksi internet lalu muat ulang halaman.</div>');
   }
+  $('verTxt').textContent = 'Versi admin ' + ADMIN_VERSION;
   loadPromoJson();
   loadImgJson();
   loadLive();
   ghRender();
+  // cek apakah admin.html di server lebih baru dari halaman yang sedang terbuka
+  (async function(){
+    try{
+      const t = await (await fetch('admin.html?t=' + Date.now(), {cache: 'no-store'})).text();
+      const m = /const ADMIN_VERSION = '([^']+)'/.exec(t);
+      if(m && m[1] > ADMIN_VERSION) $('staleBanner').hidden = false;
+    }catch(e){}
+  })();
+  $('staleReload').addEventListener('click', () => { location.href = location.pathname + '?v=' + Date.now() + location.hash; });
   if(GH.token) ghConnect(true);
 
   // ===================== TAB =====================
