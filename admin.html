@@ -328,10 +328,16 @@
           <button class="btn" type="button" id="katDl">Unduh katalog.json</button>
           <button class="btn ghost" type="button" id="katPreview">Pratinjau di halaman customer</button>
         </div>
+        <div class="status warn" id="ghNudge" style="margin-top:14px;align-items:center;flex-wrap:wrap">
+          <span style="flex:1;min-width:240px"><b>Terbit otomatis belum aktif.</b> Hubungkan GitHub sekali saja, setelah itu katalog langsung tayang setiap kali stok diupload, tanpa unduh dan upload manual.</span>
+          <button class="btn orange" type="button" id="ghNudgeBtn">Aktifkan terbit otomatis</button>
+        </div>
+        <details class="more" id="manualWrap"><summary>Atau upload manual ke GitHub</summary>
         <ol class="steps" id="manualSteps">
           <li>Buka repo GitHub katalog, klik <b>Add file &rarr; Upload files</b>, lalu upload <code>katalog.json</code> (timpa file lama).</li>
           <li>Klik <b>Commit changes</b>, tunggu 1&ndash;2 menit, lalu buka halaman katalog dan tekan Ctrl+F5.</li>
         </ol>
+        </details>
         <details class="more">
           <summary>Rincian per toko</summary>
           <div class="tbl"><table class="mini" id="storeTbl"></table></div>
@@ -907,7 +913,8 @@
     $('ghRepoHint').textContent = GH.repo || 'Katalog-Promo';
     $('buildBtn').textContent = katalog ? (on ? 'Buat & terbitkan ulang' : 'Buat ulang katalog') : (on ? 'Buat & terbitkan katalog' : 'Buat katalog');
     $('buildH').textContent = on ? 'Buat & terbitkan katalog' : 'Buat katalog';
-    $('manualSteps').hidden = on;
+    $('manualWrap').hidden = on;
+    $('ghNudge').hidden = on;
     $('katPub').hidden = !on;
     $('promoPub').hidden = !on;
     $('fotoPub').hidden = !on;
@@ -938,6 +945,11 @@
     ghRender();
   }
   $('ghToggle').addEventListener('click', () => { $('ghForm').hidden = !$('ghForm').hidden; });
+  $('ghNudgeBtn').addEventListener('click', () => {
+    $('ghForm').hidden = false;
+    $('gh').scrollIntoView({behavior: 'smooth', block: 'start'});
+    setTimeout(() => $('ghToken').focus({preventScroll: true}), 500);
+  });
   $('ghSave').addEventListener('click', () => {
     GH.owner = $('ghOwner').value.trim(); GH.repo = $('ghRepo').value.trim(); GH.branch = $('ghBranch').value.trim() || 'main';
     const t = $('ghToken').value.trim(); if(t) GH.token = t;
