@@ -897,6 +897,8 @@
   const WA_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>';
   const SHARE_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
   const waUrl = (num, text) => 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
+  // nomor artikel 12 digit per ukuran (hanya untuk pesan WA); katalog lama tanpa data ini memakai kode generic.warna
+  const artOf = (c, z) => (Array.isArray(c.a) && c.a[c.sz.indexOf(z)]) || '';
   const productUrl = (p, c) => location.origin + location.pathname + '#p=' + p.g + '-' + c.k;
   function waProductText(si){
     const p = cur.p, c = p.colors[cur.ci], s = D.stores[si];
@@ -914,7 +916,12 @@
       '*' + p.n + '*',
       'Warna: ' + colorInfo(c.k)[0] + (COLOR[c.k] ? ' (' + c.k + ')' : ''),
       sizeLine,
-      'Kode artikel: ' + p.g + '.' + c.k,
+      (() => {
+        if(oneSize || c.sz.length === 1) return 'Artikel: ' + (artOf(c, c.sz[0]) || p.g + '.' + c.k);
+        if(cur.size) return 'Artikel: ' + (artOf(c, cur.size) || p.g + '.' + c.k);
+        const list = (avail.length ? avail : c.sz).filter(z => artOf(c, z)).map(z => artOf(c, z) + ' (' + sizeLabel(z) + ')');
+        return 'Artikel: ' + (list.length ? list.join(', ') : p.g + '.' + c.k);
+      })(),
       `Harga promo: ${rp(c.net)} (diskon ${c.d}% dari ${rp(c.p)})`,
       '',
       'Apakah masih tersedia? Terima kasih.',
@@ -1258,7 +1265,7 @@
       const warna = colorInfo(c.k)[0] + (COLOR[c.k] ? ' (' + c.k + ')' : '');
       lines.push(`${i + 1}. *${p.n}*`);
       lines.push(`   Warna: ${warna}${x.z !== 'NOS' ? ' | Ukuran: ' + sizeLabel(x.z) : ''} | Jumlah: ${x.q}`);
-      lines.push(`   Kode: ${p.g}.${c.k} | ${rp(c.net)} (-${c.d}%)`);
+      lines.push(`   Artikel: ${artOf(c, x.z) || p.g + '.' + c.k} | ${rp(c.net)} (-${c.d}%)`);
     });
     lines.push('', `Perkiraan total: ${rp(total)}`, '', 'Mohon info ketersediaannya. Terima kasih.');
     return lines.join('\n');
