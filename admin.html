@@ -867,7 +867,7 @@
     return body;
   }
   function ghErrText(e){
-    if(e.status === 401) return 'Token tidak valid atau sudah kedaluwarsa. Buat token baru lalu hubungkan ulang.';
+    if(e.status === 401) return `GitHub menolak token ini (berakhiran …${esc(GH.token.slice(-4))}). Kemungkinan token tersalin tidak utuh, sudah dihapus, atau sudah kedaluwarsa. Buat token baru di GitHub, salin dengan tombol salin di sebelah token, lalu tempel lagi di sini.`;
     if(e.status === 403) return 'Token tidak punya izin menulis. Pastikan permission Contents: Read and write dan repo yang benar dipilih.';
     if(e.status === 404) return 'Repo atau branch tidak ditemukan, atau token tidak diberi akses ke repo ini.';
     if(e.status === 409 || e.status === 422) return 'File di repo baru saja berubah. Coba klik terbitkan sekali lagi.';
@@ -951,8 +951,23 @@
     setTimeout(() => $('ghToken').focus({preventScroll: true}), 500);
   });
   $('ghSave').addEventListener('click', () => {
+    const st = $('ghStatus');
     GH.owner = $('ghOwner').value.trim(); GH.repo = $('ghRepo').value.trim(); GH.branch = $('ghBranch').value.trim() || 'main';
-    const t = $('ghToken').value.trim(); if(t) GH.token = t;
+    // buang spasi, baris baru, dan karakter tak terlihat yang sering ikut tersalin
+    const t = $('ghToken').value.replace(/[\s\u200B-\u200D\uFEFF\u00A0]/g, '');
+    if(!t){
+      setStatus(st, 'err', '<b>Kolom Token masih kosong.</b> Tempel token dari GitHub (diawali <code>github_pat_</code>) lalu klik Hubungkan.');
+      return;
+    }
+    if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(t)){
+      setStatus(st, 'err', `<b>Ini sepertinya bukan token.</b> Token GitHub diawali <code>github_pat_</code> dan panjangnya sekitar 93 karakter. Yang ditempel: <code>${esc(t.slice(0, 14))}${t.length > 14 ? '…' : ''}</code> (${t.length} karakter).`);
+      return;
+    }
+    if(t.startsWith('github_pat_') && t.length < 80){
+      setStatus(st, 'err', `<b>Token terlihat terpotong</b> (${t.length} karakter, seharusnya sekitar 93). Salin ulang token secara utuh dari GitHub.`);
+      return;
+    }
+    GH.token = t;
     try{ localStorage.setItem('kp_gh', JSON.stringify({owner: GH.owner, repo: GH.repo, branch: GH.branch, token: GH.token})); }catch(e){}
     $('ghToken').value = '';
     ghConnect(false);
@@ -1105,7 +1120,7 @@
   // ===================== ANALISA =====================
   const AN = {url: '', key: '', stores: [], rows: [], from: '', to: '', range: '7', store: '', loaded: false};
   const COLS = ['tanggal','jam','event','pengunjung','sesi','kode_toko','toko','generic','warna','produk','ukuran','harga','diskon','sumber','kata_cari','hasil','perangkat','asal'];
-  const SRC_LABEL = {'toko-pilihan':'Kartu toko pilihan', 'daftar-toko':'Daftar toko lain', 'tombol-bawah':'Tombol bawah detail produk', 'pilih-toko':'Kotak pilih toko'};
+  const SRC_LABEL = {'toko-pilihan':'Kartu toko pilihan', 'daftar-toko':'Daftar toko lain', 'tombol-bawah':'Tombol bawah detail produk', 'pilih-toko':'Kotak pilih toko', 'keranjang':'Checkout keranjang'};
   const wib = d => d.toLocaleDateString('sv-SE', {timeZone: 'Asia/Jakarta'});
   const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const pct = (a, b) => b ? (a / b * 100).toLocaleString('id-ID', {maximumFractionDigits: 1}) + '%' : '-';
@@ -1202,7 +1217,8 @@
     const ev = t => rows.filter(r => r.event === t);
     const visitors = uniq(rows, r => r.pengunjung);
     const sessions = uniq(rows, r => r.sesi);
-    const views = ev('view'), wa = ev('wa'), maps = ev('maps'), search = ev('search');
+    const views = ev('view'), wa = ev('wa'), maps = ev('maps'), search = ev('search'), cartAdd = ev('cart'), cartWa = ev('cartwa');
+    const cartCheckouts = wa.filter(r => r.sumber === 'keranjang');
     const waVisitors = uniq(wa, r => r.pengunjung);
 
     // harian
@@ -1233,7 +1249,7 @@
     }).sort((a, b) => b.wa - a.wa || b.views - a.views || b.picked - a.picked);
     // produk ditanya via WA
     const waProd = new Map();
-    wa.filter(r => r.generic).forEach(r => {
+    wa.filter(r => r.generic).concat(cartWa.filter(r => r.generic)).forEach(r => {
       const key = r.generic + '.' + r.warna;
       let o = waProd.get(key);
       if(!o){ o = {key, g: r.generic, k: r.warna, n: r.produk, price: r.harga, disc: r.diskon, n_: 0, vis: new Set(), sizes: new Map(), stores: new Map()}; waProd.set(key, o); }
@@ -1249,7 +1265,7 @@
       if(!o){ o = {g: r.generic, n: r.produk, views: 0, vis: new Set(), wa: 0}; vp.set(r.generic, o); }
       o.views++; o.vis.add(r.pengunjung);
     });
-    wa.forEach(r => { const o = vp.get(r.generic); if(o) o.wa++; });
+    wa.concat(cartWa).forEach(r => { const o = vp.get(r.generic); if(o) o.wa++; });
     const topView = [...vp.values()].sort((a, b) => b.views - a.views);
     // pencarian
     const sm = new Map();
@@ -1260,13 +1276,19 @@
     });
     const topSearch = [...sm.values()].map(o => ({q: o.q, n: o.n, r: Math.round(o.res.reduce((a, b) => a + b, 0) / o.res.length)})).sort((a, b) => b.n - a.n);
     // lain-lain
-    const sizes = countBy(wa, r => r.ukuran);
+    const sizes = countBy(wa.concat(cartWa), r => r.ukuran);
+    const cm = new Map();
+    cartAdd.forEach(r => { const key = r.generic + '.' + r.warna; let o = cm.get(key); if(!o){ o = {key, n: r.produk, add: 0, ask: 0}; cm.set(key, o); } o.add++; });
+    cartWa.forEach(r => { const key = r.generic + '.' + r.warna; let o = cm.get(key); if(!o){ o = {key, n: r.produk, add: 0, ask: 0}; cm.set(key, o); } o.ask++; });
+    const topCart = [...cm.values()].sort((a, b) => b.add - a.add || b.ask - a.ask);
+    const cartItemsAsked = cartWa.length;
+    const cartQty = cartWa.reduce((a, r) => a + (Number(r.hasil) || 1), 0);
     const srcWa = countBy(wa, r => SRC_LABEL[r.sumber] || r.sumber);
     const firstOfSession = new Map();
     rows.forEach(r => { if(!firstOfSession.has(r.sesi)) firstOfSession.set(r.sesi, r); });
     const devs = countBy([...firstOfSession.values()], r => r.perangkat);
     const refs = countBy([...firstOfSession.values()], r => r.asal);
-    return {rows, visitors, sessions, views, wa, waVisitors, maps, daily, hours, perStore, topWa, topView, topSearch, sizes, srcWa, devs, refs};
+    return {cartAdd, cartWa, cartCheckouts, topCart, cartItemsAsked, cartQty, rows, visitors, sessions, views, wa, waVisitors, maps, daily, hours, perStore, topWa, topView, topSearch, sizes, srcWa, devs, refs};
   }
 
   function barsSvg(data, labelFn, h){
@@ -1340,6 +1362,17 @@
       `</div>
     </div>`;
 
+    html += `<div class="card"><h3>Keranjang${esc(storeTxt)}</h3><p class="sub">Customer menambahkan beberapa produk lalu menanyakan semuanya ke toko dalam satu pesan WA. Satu checkout dihitung satu klik WA.</p>
+      <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">
+        <div class="kpi"><div class="k-num">${fmt(A.cartAdd.length)}</div><div class="k-lbl">Kali tambah ke keranjang</div></div>
+        <div class="kpi"><div class="k-num">${fmt(A.cartCheckouts.length)}</div><div class="k-lbl">Checkout ke WA</div></div>
+        <div class="kpi"><div class="k-num">${A.cartCheckouts.length ? (A.cartItemsAsked / A.cartCheckouts.length).toLocaleString('id-ID', {maximumFractionDigits: 1}) : '-'}</div><div class="k-lbl">Rata-rata produk per checkout</div></div>
+        <div class="kpi"><div class="k-num">${fmt(A.cartQty)}</div><div class="k-lbl">Total barang ditanyakan</div></div>
+      </div>` +
+      (A.topCart.length ? `<div class="tbl"><table class="mini"><thead><tr><th>Produk</th><th style="text-align:right">Ditambah ke keranjang</th><th style="text-align:right">Ditanyakan lewat checkout</th></tr></thead><tbody>` +
+        A.topCart.slice(0, 15).map(o => `<tr><td class="wrap">${esc(o.n)} <span class="muted mono">${esc(o.key)}</span></td><td class="n">${o.add}</td><td class="n">${o.ask}</td></tr>`).join('') + `</tbody></table></div>` : '<p class="muted">Belum ada aktivitas keranjang di periode ini.</p>') +
+      `</div>`;
+
     html += `<div class="card"><h3>Jam ramai</h3><p class="sub">Kunjungan dan klik WA per jam (WIB). Berguna untuk jadwal admin WAB membalas chat.</p>${legend('Kunjungan aktif', 'Klik chat WA')}<div class="chart">${barsSvg(A.hours, x => String(x.h).padStart(2, '0'), 150)}</div></div>`;
 
     html += `<div class="an-grid">
@@ -1356,11 +1389,12 @@
     const A = AN.last; if(!A) return;
     const wb = XLSX.utils.book_new();
     const add = (name, aoa) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name);
-    add('Ringkasan', [['Periode', AN.from + ' s.d. ' + AN.to], ['Toko', AN.store ? storeName(AN.store) : 'Semua toko'], [], ['Pengunjung unik', A.visitors], ['Kunjungan', A.sessions], ['Produk dilihat', A.views.length], ['Klik chat WA', A.wa.length], ['Orang yang chat', A.waVisitors], ['Klik lokasi', A.maps.length]]);
+    add('Ringkasan', [['Periode', AN.from + ' s.d. ' + AN.to], ['Toko', AN.store ? storeName(AN.store) : 'Semua toko'], [], ['Pengunjung unik', A.visitors], ['Kunjungan', A.sessions], ['Produk dilihat', A.views.length], ['Klik chat WA', A.wa.length], ['Orang yang chat', A.waVisitors], ['Klik lokasi', A.maps.length], ['Tambah ke keranjang', A.cartAdd.length], ['Checkout keranjang ke WA', A.cartCheckouts.length], ['Barang ditanyakan via keranjang', A.cartQty]]);
     add('Harian', [['Tanggal', 'Pengunjung unik', 'Klik WA']].concat(A.daily.map(x => [x.d, x.v, x.w])));
     add('Per toko', [['Kode', 'Toko', 'Pengunjung memilih toko', 'Produk dilihat', 'Klik WA', 'Orang yang chat', 'Klik lokasi']].concat(A.perStore.map(s => [s.code, s.name, s.picked, s.views, s.wa, s.waV, s.maps])));
     add('Produk ditanya WA', [['Kode', 'Produk', 'Warna', 'Harga promo', 'Diskon %', 'Klik WA', 'Orang', 'Ukuran ditanya', 'Toko']].concat(A.topWa.map(o => [o.key, o.n, o.k, Number(o.price) || '', Number(o.disc) || '', o.n_, o.vis.size, [...o.sizes.entries()].map(([z, n]) => z + ' (' + n + ')').join(', '), [...o.stores.entries()].map(([c, n]) => storeName(c) + ' (' + n + ')').join('; ')])));
     add('Produk dilihat', [['Generic', 'Produk', 'Dilihat', 'Orang', 'Klik WA']].concat(A.topView.map(o => [o.g, o.n, o.views, o.vis.size, o.wa])));
+    add('Keranjang', [['Kode', 'Produk', 'Ditambah ke keranjang', 'Ditanyakan lewat checkout']].concat(A.topCart.map(o => [o.key, o.n, o.add, o.ask])));
     add('Pencarian', [['Kata dicari', 'Kali', 'Rata-rata hasil']].concat(A.topSearch.map(o => [o.q, o.n, o.r])));
     add('Data mentah', [COLS].concat(A.rows.map(r => COLS.map(c => r[c]))));
     XLSX.writeFile(wb, `Analisa_Katalog_${AN.from}_${AN.to}${AN.store ? '_' + AN.store : ''}.xlsx`);
