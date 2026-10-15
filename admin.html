@@ -249,12 +249,35 @@
     </div>
   </section>
 
-  <!-- 1. Promo -->
-  <section class="step" id="stepPromo">
+  <!-- 1. Master artikel -->
+  <section class="step" id="stepMaster">
     <div class="step-no">1</div>
     <div>
-      <h2>List artikel promo</h2>
-      <p class="desc">Dibaca dari <b>promo.json</b> di repo. Cukup diganti saat list promo berubah (misalnya awal bulan): pilih file promo, pilih sheet, lalu unduh promo.json dan upload ke repo.</p>
+      <h2>Master artikel</h2>
+      <p class="desc">Dibaca dari <b>master.json</b> di repo. Berisi nama, kategori, dan <b>harga normal semua artikel</b>, sehingga katalog menampilkan semua produk yang ada stoknya, bukan hanya barang promo. Ganti sebulan sekali saat master artikel baru keluar.</p>
+      <div class="status" id="masterStatus">Memeriksa master.json&hellip;</div>
+      <div class="status" id="masterPubStatus" hidden></div>
+      <details class="more" id="masterMore">
+        <summary>Ganti dengan master artikel baru (.xlsx)</summary>
+        <label class="dropzone" id="masterDrop">
+          <input type="file" id="masterFile" accept=".xlsx,.xls">
+          <div class="dz-title">Pilih file master artikel</div>
+          <div class="dz-sub">Contoh: 10_MASTER ARTIKEL OCT 2026.xlsx. Kolom wajib: Article, Cross-Site, Article Description, Loc Amount. File besar, membaca bisa 30&ndash;60 detik.</div>
+        </label>
+        <div class="row">
+          <button class="btn" type="button" id="masterPub" disabled hidden>Terbitkan master.json</button>
+          <button class="btn ghost" type="button" id="masterDl" disabled>Unduh master.json</button>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 2. Promo -->
+  <section class="step" id="stepPromo">
+    <div class="step-no">2</div>
+    <div>
+      <h2>List promo</h2>
+      <p class="desc">Dibaca dari <b>promo.json</b> di repo. Menentukan produk mana yang diskon dan berapa persen. Cukup diganti saat file promo bulan baru keluar: pilih file promo, periksa sheet, lalu terbitkan promo.json.</p>
       <div class="status" id="promoStatus">Memeriksa promo.json&hellip;</div>
       <div class="status" id="promoPubStatus" hidden></div>
       <details class="more" id="promoMore">
@@ -278,7 +301,7 @@
 
   <!-- 2. Foto -->
   <section class="step" id="stepFoto">
-    <div class="step-no">2</div>
+    <div class="step-no">3</div>
     <div>
       <h2>Foto produk</h2>
       <p class="desc">Dibaca dari <b>gambar.json</b> di repo, format sama dengan tools Stock Display Check, jadi file yang sudah ada bisa langsung dipakai. Ganti hanya saat ada master foto baru.</p>
@@ -298,7 +321,7 @@
 
   <!-- 3. Stok -->
   <section class="step" id="stepStock">
-    <div class="step-no">3</div>
+    <div class="step-no">4</div>
     <div>
       <h2>Stok harian</h2>
       <p class="desc">Upload export stock by bin semua toko. Yang dihitung hanya stok <b>available</b> di bin <b>saleable</b>, sesuai zone yang dicentang. Lokasi bazaar dilewati karena promo bazaar punya list sendiri.</p>
@@ -319,7 +342,7 @@
 
   <!-- 4. Build -->
   <section class="step" id="stepBuild">
-    <div class="step-no">4</div>
+    <div class="step-no">5</div>
     <div>
       <h2 id="buildH">Buat katalog</h2>
       <p class="desc" id="buildDesc">Stok dicocokkan dengan list promo per artikel (SKU), lalu dikelompokkan per produk dan warna lengkap dengan foto.</p>
@@ -395,7 +418,7 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-14c';
+  const ADMIN_VERSION = '2026-10-15a';
 
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
@@ -435,7 +458,7 @@
   const IMG_BASES = ['https://id-live.slatic.net/p/', 'https://sg-live-01.slatic.net/p/'];
   const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
-  let promoDB = null, imgDB = null, stock = null, katalog = null;
+  let promoDB = null, imgDB = null, stock = null, katalog = null, masterDB = null;
   let promoWb = null, promoFileName = '';
 
   const $ = id => document.getElementById(id);
@@ -474,6 +497,8 @@
   }
 
   function refreshReady(){
+    $('stepMaster').classList.toggle('ready', !!masterDB);
+    $('masterPub').disabled = $('masterDl').disabled;
     $('stepPromo').classList.toggle('ready', !!promoDB);
     $('stepFoto').classList.toggle('ready', !!imgDB);
     $('stepStock').classList.toggle('ready', !!stock);
@@ -482,11 +507,69 @@
     $('fotoPub').disabled = $('fotoDl').disabled;
   }
 
-  // ===================== 1. PROMO =====================
+  // ===================== 1. MASTER ARTIKEL =====================
+  function masterSummary(){
+    let arts = 0; const brands = new Set();
+    Object.values(masterDB.items).forEach(it => { arts += Object.keys(it.a).length; if(it.b) brands.add(it.b); });
+    return `<span><b>Master aktif:</b> ${fmt(arts)} artikel berharga, ${fmt(Object.keys(masterDB.items).length)} warna${brands.size ? ', termasuk ' + fmt(brands.size) + ' brand selain EIGER' : ''}. Sumber: ${esc(masterDB.source || '-')}, dibuat ${esc(masterDB.generated || '-')}.</span>`;
+  }
+  async function loadMasterJson(){
+    try{
+      const res = await fetch('master.json?t=' + Date.now(), {cache: 'no-store'});
+      if(!res.ok) throw 0;
+      const t = await res.text();
+      let j = null; try{ j = JSON.parse(t); }catch(e){}
+      if(!j || !j.items || !Object.keys(j.items).length){
+        if(t.length > 10) setStatus($('masterStatus'), 'err', `<span><b>master.json di repo rusak atau kosong</b> (${fmt(t.length)} byte). Pilih file master artikel di bawah, lalu terbitkan ulang.</span>`);
+        else throw 0;
+        $('masterMore').open = true; refreshReady(); return;
+      }
+      masterDB = j;
+      setStatus($('masterStatus'), 'ok', masterSummary());
+    }catch(e){
+      setStatus($('masterStatus'), 'warn', '<span><b>master.json belum ada di repo.</b> Tanpa master artikel, katalog hanya berisi barang promo. Pilih file master artikel di bawah untuk menampilkan semua produk.</span>');
+      $('masterMore').open = true;
+    }
+    refreshReady();
+  }
+  async function onMasterFile(file){
+    setStatus($('masterStatus'), '', `Membaca <b>${esc(file.name)}</b>. File master besar, mohon tunggu 30&ndash;60 detik dan jangan tutup halaman&hellip;`);
+    $('masterDl').disabled = true;
+    await nextFrame();
+    const t0 = Date.now();
+    try{
+      const wb = await readBook(file, {dense: true});
+      const name = wb.SheetNames.find(n => /master/i.test(n)) || wb.SheetNames[0];
+      const db = parsePromoRows(rowsOf(wb.Sheets[name]), name, file.name, {needDisc: false});
+      Object.values(db.items).forEach(it => { delete it.d; });
+      db.kind = 'master';
+      masterDB = db;
+      $('masterDl').disabled = false;
+      setStatus($('masterStatus'), 'ok', masterSummary() + ` <span>Selesai dalam ${Math.round((Date.now() - t0) / 1000)} detik. ${ghReady() ? 'Klik <b>Terbitkan master.json</b> supaya tersimpan di repo.' : 'Unduh master.json lalu upload ke repo.'}</span>`);
+      katalog = null; $('result').classList.remove('show');
+    }catch(e){
+      setStatus($('masterStatus'), 'err', '<b>Gagal membaca master artikel.</b> ' + esc(e.message || e));
+    }
+    refreshReady();
+  }
+
+  // gabungan master (harga semua artikel) + promo (diskon) untuk membuat katalog
+  function priceDB(){
+    const items = {};
+    if(masterDB) Object.entries(masterDB.items).forEach(([cs, it]) => { items[cs] = Object.assign({}, it, {d: 0, a: Object.assign({}, it.a)}); });
+    Object.entries(promoDB.items).forEach(([cs, it]) => {
+      const m = items[cs];
+      if(m){ m.p = it.p; m.d = it.d; Object.assign(m.a, it.a); if(!m.n) m.n = it.n; }
+      else items[cs] = Object.assign({}, it, {a: Object.assign({}, it.a)});
+    });
+    return items;
+  }
+
+  // ===================== 2. PROMO =====================
   function promoSummary(){
-    const n = Object.keys(promoDB.items).length;
-    let arts = 0; Object.values(promoDB.items).forEach(it => arts += Object.keys(it.a).length);
-    return `<span><b>${esc(promoDB.title || 'Promo')}</b>${promoDB.period ? ' (' + esc(promoDB.period) + ')' : ''}: ${fmt(arts)} artikel, ${fmt(n)} warna. Sumber: ${esc(promoDB.source || '-')}${promoDB.sheet ? ', sheet ' + esc(promoDB.sheet) : ''}.</span>`;
+    let promoArts = 0;
+    Object.values(promoDB.items).forEach(it => { if(it.d > 0) promoArts += Object.keys(it.a).length; });
+    return `<span><b>${esc(promoDB.title || 'Promo')}</b>${promoDB.period ? ' (' + esc(promoDB.period) + ')' : ''}: ${fmt(promoArts)} artikel promo, ${fmt(Object.keys(promoDB.items).length)} warna. Sumber: ${esc(promoDB.source || '-')}${promoDB.sheet ? ', sheet ' + esc(promoDB.sheet) : ''}.</span>`;
   }
 
   async function loadPromoJson(){
@@ -518,6 +601,7 @@
       promoWb = file; promoFileName = file.name;
       const sel = $('promoSheet');
       sel.innerHTML = wb.SheetNames.map(n => `<option>${esc(n)}</option>`).join('');
+
       const pick = wb.SheetNames.find(n => /store/i.test(n) && /selected/i.test(n)) || wb.SheetNames.find(n => /store/i.test(n)) || wb.SheetNames[0];
       sel.value = pick;
       $('promoPeriod').value = guessPeriod(file.name);
@@ -530,7 +614,8 @@
     }
   }
 
-  function parsePromoRows(rows, sheet, fname){
+  function parsePromoRows(rows, sheet, fname, opt){
+    const needDisc = !opt || opt.needDisc !== false;
     const h = rows.findIndex(r => r.some(c => /^article$/i.test(norm(c))));
     if(h < 0) throw new Error('Baris judul kolom "Article" tidak ditemukan di sheet ' + sheet);
     const head = rows[h];
@@ -542,10 +627,13 @@
       l3: findCol(head, /^lv3[\s-]*desc/i),
       pt: findCol(head, /^product type$/i),
       gd: findCol(head, /^gender$/i),
+      br: findCol(head, /^brand$/i),
+      at: findCol(head, /^article type$/i),
+      pc: findCol(head, /^product classification$/i),
       price: findCol(head, /^loc amount$/i),
       disc: findCol(head, /^disc/i)
     };
-    const miss = ['art','desc','price','disc'].filter(k => c[k] < 0);
+    const miss = ['art','desc','price'].concat(needDisc ? ['disc'] : []).filter(k => c[k] < 0);
     if(miss.length) throw new Error('Kolom wajib tidak ditemukan: ' + miss.map(k => ({art:'Article',desc:'Article Description',price:'Loc Amount',disc:'Disc'})[k]).join(', '));
     let title = '';
     for(let i = 0; i < h; i++){
@@ -559,10 +647,14 @@
       const art = norm(r[c.art]);
       if(!/^\d{6,}$/.test(art)) continue;
       const price = Number(r[c.price]);
-      let disc = Number(r[c.disc]);
+      let disc = needDisc ? Number(r[c.disc]) : 0;
       if(disc > 1) disc = disc / 100;
-      if(!(price > 0) || !(disc > 0)) continue;
+      if(!(price > 0)) continue;
+      if(needDisc && !(disc > 0)) continue;
+      if(!needDisc) disc = 0;
       const desc = norm(r[c.desc]);
+      // barang non-jual di master (paper bag, drawstring, shopping bag) tidak ditampilkan ke customer
+      if(!needDisc && ((c.at >= 0 && /^ZFCB$/i.test(norm(r[c.at]))) || (c.pc >= 0 && /shopping bag/i.test(norm(r[c.pc]))) || /^(paper bag|shopping bag)\b/i.test(desc))) continue;
       const parts = desc.split(',').map(s => s.trim());
       const ok = parts.length >= 3;
       let cs = c.cs >= 0 ? norm(r[c.cs]) : '';
@@ -573,11 +665,12 @@
         pt: c.pt >= 0 ? norm(r[c.pt]) : '', gd: c.gd >= 0 ? norm(r[c.gd]) : '',
         p: Math.round(price), d: Math.round(disc * 100), a: {}
       });
+      if(c.br >= 0 && !it.b){ const b = norm(r[c.br]); if(b && !/^eiger$/i.test(b)) it.b = b; }
       if(!it.n && ok) it.n = parts.slice(0, -2).join(', ');
       it.a[art] = ok ? parts[parts.length - 1] : '';
       n++;
     }
-    if(!n) throw new Error('Tidak ada artikel dengan harga dan diskon di sheet ' + sheet);
+    if(!n) throw new Error((needDisc ? 'Tidak ada artikel dengan harga dan diskon di sheet ' : 'Tidak ada artikel berharga di sheet ') + sheet);
     return {v:1, generated: today(), source: fname, sheet, title, period:'', items};
   }
 
@@ -748,8 +841,9 @@
   function buildKatalog(){
     const zones = new Set([...document.querySelectorAll('#zones input:checked')].map(i => i.value));
     if(!zones.size) throw new Error('Centang minimal satu zone.');
+    const DB = priceDB();
     const artMap = new Map();
-    Object.entries(promoDB.items).forEach(([cs, it]) => Object.entries(it.a).forEach(([art, sz]) => artMap.set(art, [cs, sz])));
+    Object.entries(DB).forEach(([cs, it]) => Object.entries(it.a).forEach(([art, sz]) => artMap.set(art, [cs, sz])));
 
     const {c, rows} = stock;
     const stores = [], storeIdx = new Map();
@@ -769,7 +863,7 @@
       if(SKIP_LOCATION.test(loc)){ skippedBaz += qty; return; }
       const [cs] = hit;
       let size = hit[1];
-      if(!size || !promoDB.items[cs].n){
+      if(!size || !DB[cs].n){
         const parts = c.name >= 0 ? norm(r[c.name]).split(',').map(s => s.trim()) : [];
         if(parts.length >= 3){
           if(!size) size = parts[parts.length - 1];
@@ -801,7 +895,7 @@
     let noPhoto = 0, totalQty = 0;
     const storeQty = new Array(storesOut.length).fill(0), storeProd = storesOut.map(() => new Set());
     agg.forEach((m1, cs) => {
-      const it = promoDB.items[cs];
+      const it = DB[cs];
       const dot = cs.indexOf('.');
       const g = cs.slice(0, dot), k = cs.slice(dot + 1);
       const sizes = new Set();
@@ -818,16 +912,18 @@
       });
       st.sort((a, b) => a[0] - b[0]);
       totalQty += colorQty;
-      const im = imgDB && imgDB.items[g] && imgDB.items[g].c && imgDB.items[g].c[k] ? imgDB.items[g].c[k].slice(0, 6) : [];
+      const im = imgDB && imgDB.items[g] && imgDB.items[g].c && imgDB.items[g].c[k] ? imgDB.items[g].c[k].slice(0, 4) : [];
       if(!im.length) noPhoto++;
       let prod = byGen.get(g);
       if(!prod){
         prod = {g, n: it.n || nameFallback.get(cs) || g, l2: it.l2, l3: it.l3, pt: it.pt, gd: it.gd, c: [], _q: 0, _d: 0};
+        if(it.b) prod.b = it.b;
         byGen.set(g, prod);
       }
       if(prod.n === g && (it.n || nameFallback.get(cs))) prod.n = it.n || nameFallback.get(cs);
       const ab = artBy.get(cs) || new Map();
-      const arts = sz.map(s => [...(ab.get(s) || [])].sort().join('/'));
+      // simpan 3 digit akhir bila artikel diawali kode generic (dirangkai ulang di halaman customer)
+      const arts = sz.map(s => [...(ab.get(s) || [])].sort().map(x => x.startsWith(g) ? x.slice(g.length) : x).join('/'));
       prod.c.push({k, p: it.p, d: it.d, im, sz, a: arts, st, _q: colorQty});
       prod._q += colorQty;
       prod._d = Math.max(prod._d, it.d);
@@ -846,12 +942,13 @@
         stockDate: $('stockDate').value || today(),
         generated: new Date().toISOString(),
         promo: {title: promoDB.title || '', period: promoDB.period || ''},
+        all: !!masterDB,
         adminVersion: ADMIN_VERSION,
         bases,
         stores: storesOut,
         items
       },
-      stats: {products: items.length, colors: agg.size, stores: storesOut.length, qty: totalQty, noPhoto, promoArts, skippedBaz, storeQty, storeProd: storeProd.map(s => s.size)}
+      stats: {promoProducts: items.filter(p => p.c.some(c => c.d > 0)).length, products: items.length, colors: agg.size, stores: storesOut.length, qty: totalQty, noPhoto, promoArts, skippedBaz, storeQty, storeProd: storeProd.map(s => s.size)}
     };
   }
 
@@ -932,6 +1029,7 @@
     $('ghNudge').hidden = on;
     $('katPub').hidden = !on;
     $('promoPub').hidden = !on;
+    $('masterPub').hidden = !on;
     $('fotoPub').hidden = !on;
     if($('panelAnalisa').hidden){
       $('heroP').innerHTML = on
@@ -1056,11 +1154,14 @@
     btn.disabled = false;
   }
   $('katPub').addEventListener('click', () => katalog && publishKatalog());
+  $('masterDl').addEventListener('click', () => masterDB && download('master.json', masterDB));
+  $('masterPub').addEventListener('click', () => masterDB && publishJson('master.json', masterDB, $('masterPub'), $('masterPubStatus'), 'master artikel'));
   $('promoPub').addEventListener('click', () => promoDB && publishJson('promo.json', promoDB, $('promoPub'), $('promoPubStatus'), 'list promo'));
   $('fotoPub').addEventListener('click', () => imgDB && publishJson('gambar.json', imgDB, $('fotoPub'), $('fotoPubStatus'), 'master foto'));
 
   async function onBuild(){
     $('buildErr').hidden = true;
+    if(!masterDB && !confirm('Master artikel (master.json) belum terbaca, jadi katalog hanya berisi barang promo.\n\nTetap buat katalog hanya barang promo?')) return;
     if(!imgDB && !confirm('Data foto (gambar.json) belum terbaca, jadi semua produk akan tampil tanpa foto.\n\nTetap buat katalog tanpa foto?')) return;
     $('buildBtn').disabled = true;
     $('buildBtn').textContent = 'Memproses…';
@@ -1069,9 +1170,9 @@
       const {katalog: k, stats} = buildKatalog();
       katalog = k;
       $('stats').innerHTML = `
-        <div class="stat"><div class="num">${fmt(stats.products)}</div><div class="lbl">Produk tampil (${fmt(stats.colors)} warna)</div></div>
+        <div class="stat"><div class="num">${fmt(stats.products)}</div><div class="lbl">Produk tampil (${fmt(stats.colors)} warna, ${fmt(stats.promoProducts)} promo)</div></div>
         <div class="stat"><div class="num">${fmt(stats.stores)}</div><div class="lbl">Toko</div></div>
-        <div class="stat"><div class="num">${fmt(stats.qty)}</div><div class="lbl">Pcs stok promo</div></div>
+        <div class="stat"><div class="num">${fmt(stats.qty)}</div><div class="lbl">Pcs stok</div></div>
         <div class="stat ${stats.noPhoto ? 'flag' : ''}"><div class="num">${fmt(stats.noPhoto)}</div><div class="lbl">Warna tanpa foto</div></div>`;
       $('storeTbl').innerHTML = '<thead><tr><th>Toko</th><th>Kota</th><th>WhatsApp</th><th style="text-align:right">Produk</th><th style="text-align:right">Pcs</th></tr></thead><tbody>' +
         k.stores.map((s, i) => `<tr><td><span class="mono">${esc(s.code)}</span> ${esc(s.name)}</td><td>${esc(s.city || '-')}</td><td class="mono">${s.wa ? esc(s.wa) : '<span style="color:#C9531F">belum ada</span>'}</td><td class="n">${fmt(stats.storeProd[i])}</td><td class="n">${fmt(stats.storeQty[i])}</td></tr>`).join('') + '</tbody>';
@@ -1097,6 +1198,7 @@
   }
 
   // ===================== wiring =====================
+  wireDrop('masterDrop', 'masterFile', onMasterFile);
   wireDrop('promoDrop', 'promoFile', onPromoFile);
   wireDrop('fotoDrop', 'fotoFile', onFotoFile);
   wireDrop('stockDrop', 'stockFile', onStockFile);
@@ -1112,6 +1214,7 @@
     document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="status err"><b>Library Excel gagal dimuat.</b> Periksa koneksi internet lalu muat ulang halaman.</div>');
   }
   $('verTxt').textContent = 'Versi admin ' + ADMIN_VERSION;
+  loadMasterJson();
   loadPromoJson();
   loadImgJson();
   loadLive();
