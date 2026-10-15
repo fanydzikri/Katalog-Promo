@@ -123,7 +123,6 @@
   .back-btn:hover{border-color:var(--navy);background:var(--navy-tint);}
   .back-btn:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
   .rb-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .badge.new{background:var(--navy);}
 
   /* ---------- Category tabs ---------- */
   .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:0 0 14px;overflow-x:auto;scrollbar-width:none;}
@@ -139,6 +138,9 @@
   .filter-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
   .fb-field{display:flex;flex-direction:column;gap:5px;}
   .fb-more{display:contents;}
+  .fb-sort{order:4;}
+  .fb-price{order:5;flex-basis:100%;}
+  .fb-price .seg{align-self:flex-start;}
   .fb-toggle,.sheet-head,.sheet-foot,.sheet-bd{display:none;}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
   html.lock,html.lock body{overflow:hidden;}
@@ -467,6 +469,10 @@
     .sheet-foot{display:flex;gap:8px;position:sticky;bottom:0;background:#fff;padding:12px 0 calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);margin-top:auto;}
     .sheet-foot .btn{flex:1;padding:13px 10px;font-size:14.5px;}
     .fb-more .fb-field{width:100%;}
+    .fb-more .fb-sort{order:6;}
+    .fb-more .fb-price{order:5;}
+    .fb-more .sheet-head{order:0;}
+    .fb-more .sheet-foot{order:9;}
     .fb-more .fb-label{font-size:13px;color:var(--ink);}
     .fb-more .ms-btn{display:none;}
     .fb-more .ms-panel{display:block;position:static;width:auto;box-shadow:none;border:none;margin:0;overflow:visible;border-radius:0;}
@@ -476,8 +482,10 @@
     .fb-more .ms-item:has(input:checked){border-color:var(--navy);background:var(--navy-tint);color:var(--navy);}
     .fb-more .ms-sizes{padding:0;gap:8px;}
     .fb-more .ms-sizes span{min-width:50px;padding:9px 10px;font-size:14px;border-radius:8px;}
-    .fb-more .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
-    .fb-more .seg button{padding:10px 4px;font-size:14px;}
+    .fb-more .seg{display:flex;flex-wrap:wrap;gap:8px;background:none;padding:0;}
+    .fb-more .seg button{flex:none;border:1px solid var(--line-strong);border-radius:8px;background:#fff;padding:9px 14px;font-size:14px;min-width:54px;}
+    .fb-more .seg button[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff;}
+    .fb-more .seg button.promo-opt[aria-pressed="true"]{border-color:var(--orange);background:var(--orange);color:#fff;}
     .fb-more .sel{width:100%;font-size:16px;padding:11px 12px;}
 
     .result-bar{margin:12px 2px 10px;font-size:13px;}
@@ -569,7 +577,7 @@
 <main class="wrap">
   <section class="landing" id="landing" aria-labelledby="landH">
     <h2 class="land-h" id="landH">Mau cari apa hari ini?</h2>
-    <p class="land-sub" id="landSub">Pilih kategori, atau lihat produk terbaru dan promo.</p>
+    <p class="land-sub" id="landSub">Pilih kategori, atau lihat koleksi utama dan promo.</p>
     <form class="land-search" id="landSearch" role="search">
       <label for="landQ" class="sr-only">Cari produk</label>
       <input id="landQ" type="search" placeholder="Cari produk, mis. jaket, sandal, carrier" autocomplete="off" enterkeyhint="search">
@@ -593,12 +601,12 @@
       <div class="sheet-head"><b>Filter &amp; urutkan</b><button type="button" data-sheet="close" aria-label="Tutup filter">&times;</button></div>
       <div class="fb-field"><span class="fb-label">Untuk</span><div class="ms" id="msGender"></div></div>
       <div class="fb-field"><span class="fb-label">Ukuran</span><div class="ms right" id="msSize"></div></div>
-      <div class="fb-field"><span class="fb-label">Diskon</span>
-        <div class="seg" id="segDisc" role="group" aria-label="Besaran diskon">
+      <div class="fb-field fb-price"><span class="fb-label">Harga</span>
+        <div class="seg" id="segDisc" role="group" aria-label="Pilihan harga">
           <button type="button" data-v="0" aria-pressed="true">Semua</button>
         </div>
       </div>
-      <div class="fb-field"><label class="fb-label" for="sort">Urutkan</label>
+      <div class="fb-field fb-sort"><label class="fb-label" for="sort">Urutkan</label>
         <select id="sort" class="sel">
           <option value="disc">Rekomendasi</option>
           <option value="low">Harga terendah</option>
@@ -672,22 +680,34 @@
   const CAT = {APPAREL:'Pakaian', FOOTWEAR:'Alas kaki', BAGS:'Tas', HEADWEAR:'Topi', ACCESSORIES:'Aksesoris', EQUIPMENT:'Perlengkapan'};
   // kategori untuk menu "Mau cari apa?" dan tab, dari kategori induk (Lv3) + jenis produk
   const CATS = [
-    {k: 'TAS',          label: 'Tas',          t: (l3, pt) => l3 === 'BAGS'},
-    {k: 'SEPATU',       label: 'Sepatu',       t: (l3, pt) => l3 === 'FOOTWEAR' && /shoe|boot|slip on|sneaker/.test(pt)},
-    {k: 'SANDAL',       label: 'Sandal',       t: (l3, pt) => l3 === 'FOOTWEAR' && /strap|sandal|slide|flip|toe/.test(pt)},
-    {k: 'JAKET',        label: 'Jaket',        t: (l3, pt) => l3 === 'APPAREL' && /jacket|vest|hoodie|sweat|rainsuit|poncho|fleece|parka|coat/.test(pt)},
-    {k: 'KEMEJA',       label: 'Kemeja',       t: (l3, pt) => l3 === 'APPAREL' && /^shirt|jack shirt/.test(pt)},
-    {k: 'KAOS',         label: 'Kaos',         t: (l3, pt) => l3 === 'APPAREL' && /t-shirt|polo|jersey|henley|^top|sport bra|tank/.test(pt)},
-    {k: 'CELANA',       label: 'Celana',       t: (l3, pt) => l3 === 'APPAREL' && /pants|short|bottom|skirt|overall|legging|jogger/.test(pt)},
-    {k: 'TOPI',         label: 'Topi',         t: (l3, pt) => l3 === 'HEADWEAR'},
-    {k: 'AKSESORIS',    label: 'Aksesoris',    t: (l3, pt) => l3 === 'ACCESSORIES' || l3 === 'FOOTWEAR'},
-    {k: 'PERLENGKAPAN', label: 'Perlengkapan', t: (l3, pt) => l3 === 'EQUIPMENT'}
+    // t: aturan masuk kategori (l3 = kategori induk, pt = jenis produk, n = nama), pref: jenis produk acuan untuk foto contoh
+    {k: 'TAS',          label: 'Tas',          t: (l3, pt, n) => l3 === 'BAGS',
+                                                pref: /daypack|rucksack|travel backpack/},
+    {k: 'SEPATU',       label: 'Sepatu',       t: (l3, pt, n) => l3 === 'FOOTWEAR' && (/shoe|boot|sneaker/.test(pt) || (/slip on/.test(pt) && /low cut|mid cut|high cut|shoe|boot|sneaker/.test(n))),
+                                                pref: /low cut shoes|mid cut shoes/},
+    {k: 'SANDAL',       label: 'Sandal',       t: (l3, pt, n) => l3 === 'FOOTWEAR' && /strap|sandal|slide|flip|toe|slip on|clog/.test(pt + ' ' + n) && !/sock|lace|gaiter/.test(pt + ' ' + n),
+                                                pref: /roll strap|pinch strap/},
+    {k: 'JAKET',        label: 'Jaket',        t: (l3, pt, n) => l3 === 'APPAREL' && (/jacket|vest|hoodie|sweat|fleece|parka|coat/.test(pt) || /jacket/.test(n)) && !/rainsuit|poncho/.test(pt),
+                                                pref: /windproof jacket|softshell jacket|insulated jacket|fleece jacket/},
+    {k: 'KEMEJA',       label: 'Kemeja',       t: (l3, pt, n) => l3 === 'APPAREL' && /^shirt|jack shirt/.test(pt),
+                                                pref: /^shirt \(long/},
+    {k: 'KAOS',         label: 'Kaos',         t: (l3, pt, n) => l3 === 'APPAREL' && /t-shirt|polo|jersey|henley|^top|sport bra|tank/.test(pt),
+                                                pref: /t-shirt \(short/},
+    {k: 'CELANA',       label: 'Celana',       t: (l3, pt, n) => l3 === 'APPAREL' && /pants|short|bottom|skirt|overall|legging|jogger/.test(pt),
+                                                pref: /pants \(regular\)/},
+    {k: 'TOPI',         label: 'Topi',         t: (l3, pt, n) => l3 === 'HEADWEAR',
+                                                pref: /caps/},
+    {k: 'AKSESORIS',    label: 'Aksesoris',    t: (l3, pt, n) => l3 === 'ACCESSORIES' || l3 === 'FOOTWEAR',
+                                                pref: /^digital|^analog/},
+    // jas hujan (rainsuit, poncho) masuk perlengkapan, bukan jaket
+    {k: 'PERLENGKAPAN', label: 'Perlengkapan', t: (l3, pt, n) => l3 === 'EQUIPMENT' || (l3 === 'APPAREL' && /rainsuit|poncho/.test(pt)),
+                                                pref: /camping tent|bottle/}
   ];
   const CAT_ORDER = CATS.map(c => c.k);
   const CATL = k => (CATS.find(c => c.k === k) || {label: 'Lainnya'}).label;
   function catOf(it){
-    const l3 = String(it.l3 || '').toUpperCase(), pt = String(it.pt || '').toLowerCase();
-    const c = CATS.find(c => c.t(l3, pt));
+    const l3 = String(it.l3 || '').toUpperCase(), pt = String(it.pt || '').toLowerCase(), n = String(it.n || '').toLowerCase();
+    const c = CATS.find(c => c.t(l3, pt, n));
     return c ? c.k : 'OTHER';
   }
   const GENDER = {'Male':'Pria', 'Female':'Wanita', 'Adult Unisex':'Unisex', 'Kids Unisex':'Anak', 'Boys':'Anak', 'Girls':'Anak'};
@@ -954,7 +974,7 @@
 
   function cardHtml({p, v}){
     const c0 = v.cheapest.im.length ? v.cheapest : (v.cols.find(c => c.im.length) || v.cheapest);
-    const badge = !v.maxD ? (D.all ? '<span class="badge new">NEW</span>' : '') : v.maxD !== v.minD ? `<span class="badge"><small>hingga</small>-${v.maxD}%</span>` : `<span class="badge">-${v.maxD}%</span>`;
+    const badge = !v.maxD ? '' : v.maxD !== v.minD ? `<span class="badge"><small>hingga</small>-${v.maxD}%</span>` : `<span class="badge">-${v.maxD}%</span>`;
     const multiPrice = new Set(v.cols.map(c => c.net)).size > 1;
     const dots = v.cols.slice(0, 5).map(c => { const [nm, hex] = colorInfo(c.k); return `<span class="dot" title="${esc(nm)}" style="background:${hex || 'repeating-linear-gradient(45deg,#e1e6f0 0 3px,#fff 3px 6px)'}"></span>`; }).join('');
     const more = v.cols.length > 5 ? `<small>+${v.cols.length - 5}</small>` : '';
@@ -1447,14 +1467,17 @@
   // ---------- halaman awal "Mau cari apa?" ----------
   S.browse = false;
   function availIn(p){ return S.store < 0 || p.byStore.has(S.store); }
-  function pickPhoto(list){
-    // foto dari produk dengan stok terbanyak (di toko pilihan bila ada) yang punya foto
-    let best = null, bq = -1;
+  function pickPhoto(list, pref, used){
+    // foto contoh: utamakan jenis produk acuan kategori, produk dewasa, lalu stok terbanyak; foto yang sudah dipakai kotak lain dilewati
+    let best = null, bs = -1, bestG = '';
     list.forEach(p => {
+      if(used && used.has('g:' + p.g)) return;
       const c = p.colors.find(c => c.im.length); if(!c) return;
       const q = S.store >= 0 ? (p.byStore.get(S.store) || {qty: 0}).qty : p.qty;
-      if(q > bq){ bq = q; best = c.im[0]; }
+      const score = (pref && pref.test(String(p.pt || '').toLowerCase()) ? 2e9 : 0) + (p.gender !== 'Anak' ? 1e9 : 0) + q;
+      if(score > bs){ bs = score; best = c.im[0]; bestG = p.g; }
     });
+    if(best && used) used.add('g:' + bestG);
     return best;
   }
   function renderLanding(){
@@ -1463,18 +1486,19 @@
     const nPromo = av.filter(p => p.colors.some(c => c.d > 0)).length;
     const maxD = Math.max(0, ...av.flatMap(p => p.colors.map(c => c.d)));
     const where = S.store >= 0 ? ' di ' + D.stores[S.store].name : '';
-    $('landSub').textContent = `Pilih kategori, atau lihat produk terbaru dan promo${where}.`;
+    $('landSub').textContent = `Pilih kategori, atau lihat koleksi utama dan promo${where}.`;
     let feat = '';
-    if(D.all && nNew) feat += `<button type="button" class="feat-card new" data-go="new"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d === 0 && c.im.length))), 120, '')}</span><span class="ft"><b>New Arrival</b><span>Produk terbaru dengan harga normal</span><small>${nNew.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
+    if(D.all && nNew) feat += `<button type="button" class="feat-card new" data-go="new"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d === 0 && c.im.length))), 120, '')}</span><span class="ft"><b>Koleksi Utama</b><span>Produk pilihan dengan harga normal</span><small>${nNew.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
     if(nPromo) feat += `<button type="button" class="feat-card promo" data-go="promo"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d > 0 && c.im.length))), 120, '')}</span><span class="ft"><b>Promo s.d. ${maxD}%</b><span>${esc((D.promo && D.promo.title) || 'Produk pilihan diskon')}</span><small>${nPromo.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
     $('feat').innerHTML = feat;
     $('feat').style.gridTemplateColumns = (feat.match(/feat-card/g) || []).length < 2 ? '1fr' : '';
-    const tile = (cat, label, list, cls) => `<button type="button" class="tile${cls ? ' ' + cls : ''}" data-go="${cat ? 'cat' : 'all'}"${cat ? ` data-cat="${cat}"` : ''}><span class="ti">${imgTag(pickPhoto(list), 300, '')}</span><span class="tl"><b>${esc(label)}</b><small>${list.length.toLocaleString('id-ID')} produk</small></span></button>`;
+    const used = new Set();
+    const tile = (cat, label, list, cls, pref) => `<button type="button" class="tile${cls ? ' ' + cls : ''}" data-go="${cat ? 'cat' : 'all'}"${cat ? ` data-cat="${cat}"` : ''}><span class="ti">${imgTag(pickPhoto(list, pref, used), 300, '')}</span><span class="tl"><b>${esc(label)}</b><small>${list.length.toLocaleString('id-ID')} produk</small></span></button>`;
     const other = av.filter(p => p.cat === 'OTHER');
     $('tiles').innerHTML = CATS.map(c => {
       const list = av.filter(p => p.cat === c.k);
-      return list.length ? tile(c.k, c.label, list) : '';
-    }).join('') + (other.length ? tile('OTHER', 'Lainnya', other) : '') + tile('', 'Semua produk', av, 'all');
+      return list.length ? tile(c.k, c.label, list, '', c.pref) : '';
+    }).join('') + (other.length ? tile('OTHER', 'Lainnya', other) : '') + tile('', 'Semua produk', av, 'all', /rucksack|daypack|windproof jacket/);
   }
   function showMode(){
     $('landing').hidden = S.browse;
@@ -1507,7 +1531,7 @@
   $('landing').addEventListener('click', e => {
     const b = e.target.closest('[data-go]'); if(!b) return;
     const go = b.dataset.go;
-    if(go === 'new'){ enterBrowse({disc: -2}); track('search', {q: 'menu: new arrival', r: lastCount, src: 'menu'}); }
+    if(go === 'new'){ enterBrowse({disc: -2}); track('search', {q: 'menu: koleksi utama', r: lastCount, src: 'menu'}); }
     else if(go === 'promo'){ enterBrowse({disc: -1}); track('search', {q: 'menu: promo', r: lastCount, src: 'menu'}); }
     else if(go === 'all'){ enterBrowse({}); }
     else if(go === 'cat'){ enterBrowse({cat: b.dataset.cat}); track('search', {q: 'kategori: ' + CATL(b.dataset.cat).toLowerCase(), r: lastCount, src: 'menu'}); }
@@ -1677,7 +1701,7 @@
     const discs = [...new Set(P.flatMap(p => p.colors.map(c => c.d)))].sort((a, b) => a - b);
     const promoDiscs = discs.filter(d => d > 0);
     $('segDisc').innerHTML = '<button type="button" data-v="0" aria-pressed="true">Semua</button>' +
-      (D.all ? '<button type="button" data-v="-2" aria-pressed="false">New Arrival</button>' : '') +
+      (D.all ? '<button type="button" data-v="-2" aria-pressed="false">Koleksi Utama</button>' : '') +
       (promoDiscs.length ? '<button type="button" class="promo-opt" data-v="-1" aria-pressed="false">Promo</button>' : '') +
       promoDiscs.map(d => `<button type="button" data-v="${d}" aria-pressed="false">${d}%</button>`).join('');
     const nPromo = P.filter(p => p.colors.some(c => c.d > 0)).length;
@@ -1692,7 +1716,7 @@
     const usp = new URLSearchParams(location.search);
     const catQ = (usp.get('kategori') || usp.get('cat') || '').toUpperCase();
     if(usp.get('promo') === '1') enterBrowse({disc: -1}, false);
-    else if(usp.get('new') === '1') enterBrowse({disc: -2}, false);
+    else if(usp.get('utama') === '1' || usp.get('new') === '1') enterBrowse({disc: -2}, false);
     else if(CAT_ORDER.includes(catQ) || catQ === 'OTHER') enterBrowse({cat: catQ}, false);
     else { showMode(); renderLanding(); }
     track('visit', storeInfo(si));
