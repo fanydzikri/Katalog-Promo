@@ -85,6 +85,46 @@
   .picker .wa-btn{display:none;margin-top:12px;}
   .picker .wa-btn.show{display:inline-flex;}
 
+  /* ---------- Landing: mau cari apa ---------- */
+  .landing{padding-top:6px;}
+  .land-h{font-size:24px;font-weight:800;color:var(--navy-ink);letter-spacing:-0.02em;margin:0 0 4px;}
+  .land-sub{margin:0 0 16px;color:var(--ink-soft);font-size:14px;}
+  .land-search{display:flex;gap:8px;margin-bottom:18px;max-width:560px;}
+  .land-search input{flex:1;min-width:0;border:2px solid var(--line-strong);border-radius:10px;padding:11px 14px 11px 40px;font-size:15px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%235A6482' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px center;color:var(--ink);}
+  .land-search input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-tint);}
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+  .feat-card{display:flex;align-items:center;gap:14px;border:none;border-radius:14px;padding:16px 18px;text-align:left;cursor:pointer;color:#fff;min-height:96px;position:relative;overflow:hidden;font-family:inherit;}
+  .feat-card:focus-visible{outline:3px solid var(--orange);outline-offset:3px;}
+  .feat-card.new{background:var(--navy);}
+  .feat-card.new:hover{background:var(--navy-deep);}
+  .feat-card.promo{background:var(--orange);}
+  .feat-card.promo:hover{background:var(--orange-deep);}
+  .feat-card .fi{width:64px;height:64px;border-radius:12px;background:#fff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .feat-card .fi img{width:100%;height:100%;object-fit:contain;}
+  .feat-card .fi .noimg{font-size:0;}
+  .feat-card .ft{flex:1;min-width:0;line-height:1.3;}
+  .feat-card .ft b{display:block;font-size:19px;font-weight:800;letter-spacing:-0.01em;}
+  .feat-card .ft span{font-size:13px;opacity:.88;}
+  .feat-card .ft small{display:block;font-size:12.5px;font-weight:700;margin-top:4px;opacity:.95;}
+  .feat-card .fa{font-size:24px;font-weight:800;flex:none;}
+  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;}
+  .tile.all .tl{background:var(--orange);}
+  .tile.all .tl small{color:#FFE3D6;}
+  .tile{display:flex;flex-direction:column;border:none;padding:0;background:#E9ECF1;border-radius:14px;overflow:hidden;cursor:pointer;font-family:inherit;text-align:center;transition:transform .15s ease,box-shadow .15s ease;}
+  .tile:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(11,27,74,.14);}
+  .tile:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .tile .ti{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:8px;}
+  .tile .ti img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;}
+  .tile .tl{background:var(--navy-ink);color:#fff;padding:9px 6px 8px;line-height:1.15;}
+  .tile .tl b{display:block;font-size:14px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.02em;}
+  .tile .tl small{display:block;font-size:11px;color:#9FB0E3;margin-top:2px;font-weight:600;}
+  .land-all{text-align:center;margin-top:20px;}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);background:#fff;color:var(--navy);font-weight:700;font-size:13px;border-radius:999px;padding:6px 12px 6px 10px;cursor:pointer;font-family:inherit;}
+  .back-btn:hover{border-color:var(--navy);background:var(--navy-tint);}
+  .back-btn:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .rb-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .badge.new{background:var(--navy);}
+
   /* ---------- Category tabs ---------- */
   .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:0 0 14px;overflow-x:auto;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
@@ -351,6 +391,7 @@
 
   @media (max-width:900px){
     .hero .wrap{grid-template-columns:1fr;gap:22px;padding-top:26px;padding-bottom:32px;}
+    .tiles{grid-template-columns:repeat(4,minmax(0,1fr));}
     dialog.pd{width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:none;margin:0;border-radius:0;}
     .pd-inner{display:block;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
     .pd-left{border-right:none;overflow:visible;padding:14px 14px 0;}
@@ -376,6 +417,18 @@
     .hero .wrap{gap:16px;padding-top:18px;padding-bottom:22px;}
     .hero-disc{gap:10px;margin-bottom:8px;}
     .promo-card{gap:10px 14px;padding:12px 14px;margin-top:14px;}
+    .land-h{font-size:20px;}
+    .land-sub{font-size:13px;margin-bottom:12px;}
+    .land-search input{font-size:16px;}
+    .feat{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+    .feat-card{min-height:0;padding:12px 14px;}
+    .feat-card .fi{width:52px;height:52px;}
+    .feat-card .ft b{font-size:17px;}
+    .tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .tile{border-radius:12px;}
+    .tile .tl{padding:7px 4px 6px;}
+    .tile .tl b{font-size:12px;}
+    .tile .tl small{font-size:10px;}
     .promo-card .hero-disc .big{font-size:46px;}
     .pc-txt b{font-size:14.5px;}
     .pc-btn{width:100%;justify-content:center;padding:11px;}
@@ -514,6 +567,19 @@
 </section>
 
 <main class="wrap">
+  <section class="landing" id="landing" aria-labelledby="landH">
+    <h2 class="land-h" id="landH">Mau cari apa hari ini?</h2>
+    <p class="land-sub" id="landSub">Pilih kategori, atau lihat produk terbaru dan promo.</p>
+    <form class="land-search" id="landSearch" role="search">
+      <label for="landQ" class="sr-only">Cari produk</label>
+      <input id="landQ" type="search" placeholder="Cari produk, mis. jaket, sandal, carrier" autocomplete="off" enterkeyhint="search">
+      <button type="submit" class="btn">Cari</button>
+    </form>
+    <div class="feat" id="feat"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <div id="browse" hidden>
   <div class="controls" id="controls">
   <div class="tabs" role="tablist" id="tabs" aria-label="Kategori"></div>
 
@@ -547,9 +613,10 @@
   <div class="sheet-bd" id="sheetBd"></div>
   </div>
 
-  <div class="result-bar"><span id="resultTxt">Memuat katalog&hellip;</span><button type="button" class="reset-btn" id="resetBtn" hidden>Hapus semua filter</button></div>
+  <div class="result-bar"><span class="rb-left"><button type="button" class="back-btn" id="backBtn"><span aria-hidden="true">&larr;</span> Pilih kategori</button><span id="resultTxt">Memuat katalog&hellip;</span></span><button type="button" class="reset-btn" id="resetBtn" hidden>Hapus semua filter</button></div>
   <div class="grid" id="grid" aria-live="polite"></div>
   <div class="more-wrap" id="moreWrap" hidden><button type="button" class="btn ghost" id="moreBtn">Tampilkan lebih banyak</button><small id="moreTxt"></small></div>
+  </div>
 
   <div class="note">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
@@ -603,7 +670,26 @@
 
   // ---------- label untuk customer ----------
   const CAT = {APPAREL:'Pakaian', FOOTWEAR:'Alas kaki', BAGS:'Tas', HEADWEAR:'Topi', ACCESSORIES:'Aksesoris', EQUIPMENT:'Perlengkapan'};
-  const CAT_ORDER = ['APPAREL','FOOTWEAR','BAGS','HEADWEAR','ACCESSORIES','EQUIPMENT'];
+  // kategori untuk menu "Mau cari apa?" dan tab, dari kategori induk (Lv3) + jenis produk
+  const CATS = [
+    {k: 'TAS',          label: 'Tas',          t: (l3, pt) => l3 === 'BAGS'},
+    {k: 'SEPATU',       label: 'Sepatu',       t: (l3, pt) => l3 === 'FOOTWEAR' && /shoe|boot|slip on|sneaker/.test(pt)},
+    {k: 'SANDAL',       label: 'Sandal',       t: (l3, pt) => l3 === 'FOOTWEAR' && /strap|sandal|slide|flip|toe/.test(pt)},
+    {k: 'JAKET',        label: 'Jaket',        t: (l3, pt) => l3 === 'APPAREL' && /jacket|vest|hoodie|sweat|rainsuit|poncho|fleece|parka|coat/.test(pt)},
+    {k: 'KEMEJA',       label: 'Kemeja',       t: (l3, pt) => l3 === 'APPAREL' && /^shirt|jack shirt/.test(pt)},
+    {k: 'KAOS',         label: 'Kaos',         t: (l3, pt) => l3 === 'APPAREL' && /t-shirt|polo|jersey|henley|^top|sport bra|tank/.test(pt)},
+    {k: 'CELANA',       label: 'Celana',       t: (l3, pt) => l3 === 'APPAREL' && /pants|short|bottom|skirt|overall|legging|jogger/.test(pt)},
+    {k: 'TOPI',         label: 'Topi',         t: (l3, pt) => l3 === 'HEADWEAR'},
+    {k: 'AKSESORIS',    label: 'Aksesoris',    t: (l3, pt) => l3 === 'ACCESSORIES' || l3 === 'FOOTWEAR'},
+    {k: 'PERLENGKAPAN', label: 'Perlengkapan', t: (l3, pt) => l3 === 'EQUIPMENT'}
+  ];
+  const CAT_ORDER = CATS.map(c => c.k);
+  const CATL = k => (CATS.find(c => c.k === k) || {label: 'Lainnya'}).label;
+  function catOf(it){
+    const l3 = String(it.l3 || '').toUpperCase(), pt = String(it.pt || '').toLowerCase();
+    const c = CATS.find(c => c.t(l3, pt));
+    return c ? c.k : 'OTHER';
+  }
   const GENDER = {'Male':'Pria', 'Female':'Wanita', 'Adult Unisex':'Unisex', 'Kids Unisex':'Anak', 'Boys':'Anak', 'Girls':'Anak'};
   const GENDER_ORDER = ['Pria','Wanita','Unisex','Anak'];
   const LINE = {MOUNTAINEERING:'Mountaineering', LIFESTYLE:'Lifestyle', RIDING:'Riding', ACTIVE:'Active', TACTICAL:'Tactical'};
@@ -758,12 +844,13 @@
   function prepare(){
     BASES = Array.isArray(D.bases) && D.bases.length ? D.bases : BASES;
     P = D.items.map((it, idx) => {
-      const p = {idx, g: it.g, n: it.n, brand: it.b || '', l3: it.l3, cat: CAT[it.l3] ? it.l3 : 'OTHER', line: LINE[it.l2] || '', gender: GENDER[it.gd] || 'Unisex', pt: it.pt, colors: it.c};
+      const p = {idx, g: it.g, n: it.n, brand: it.b || '', l3: it.l3, cat: catOf(it), line: LINE[it.l2] || '', gender: GENDER[it.gd] || 'Unisex', pt: it.pt, colors: it.c};
       const en = (it.n + ' ' + (it.pt || '')).toLowerCase();
       const syn = SYN.filter(([re]) => re.test(en)).map(([, w]) => w).join(' ');
-      p.search = (en + ' ' + syn + ' ' + (it.b || '') + ' ' + it.g + ' ' + (CAT[it.l3] || '') + ' ' + p.gender + ' ' + p.line + ' ' + it.c.map(c => colorInfo(c.k)[0]).join(' ')).toLowerCase();
+      p.search = (en + ' ' + syn + ' ' + (it.b || '') + ' ' + it.g + ' ' + (CAT[it.l3] || '') + ' ' + CATL(catOf(it)) + ' ' + p.gender + ' ' + p.line + ' ' + it.c.map(c => colorInfo(c.k)[0]).join(' ')).toLowerCase();
       // per toko: warna (indeks) dan ukuran yang tersedia
       p.byStore = new Map();
+      p.qty = 0;
       p.allSizes = new Set();
       it.c.forEach((c, ci) => {
         c.net = net(c);
@@ -771,7 +858,7 @@
         c.st.forEach(row => {
           const si = row[0];
           let e = p.byStore.get(si); if(!e){ e = {colors:new Set(), sizes:new Set(), qty:0}; p.byStore.set(si, e); }
-          row.slice(1).forEach((q, k) => { if(q > 0){ e.colors.add(ci); e.sizes.add(c.sz[k]); e.qty += q; p.allSizes.add(c.sz[k]); } });
+          row.slice(1).forEach((q, k) => { if(q > 0){ e.colors.add(ci); e.sizes.add(c.sz[k]); e.qty += q; p.qty += q; p.allSizes.add(c.sz[k]); } });
         });
       });
       return p;
@@ -790,7 +877,7 @@
       cols = p.colors; sizes = p.allSizes;
     }
     if(S.disc){
-      cols = cols.filter(c => S.disc < 0 ? c.d > 0 : c.d === S.disc);
+      cols = cols.filter(c => S.disc === -2 ? c.d === 0 : S.disc < 0 ? c.d > 0 : c.d === S.disc);
       if(!cols.length) return null;
       // ukuran dihitung ulang hanya dari warna yang lolos filter diskon
       sizes = new Set();
@@ -867,7 +954,7 @@
 
   function cardHtml({p, v}){
     const c0 = v.cheapest.im.length ? v.cheapest : (v.cols.find(c => c.im.length) || v.cheapest);
-    const badge = !v.maxD ? '' : v.maxD !== v.minD ? `<span class="badge"><small>hingga</small>-${v.maxD}%</span>` : `<span class="badge">-${v.maxD}%</span>`;
+    const badge = !v.maxD ? (D.all ? '<span class="badge new">NEW</span>' : '') : v.maxD !== v.minD ? `<span class="badge"><small>hingga</small>-${v.maxD}%</span>` : `<span class="badge">-${v.maxD}%</span>`;
     const multiPrice = new Set(v.cols.map(c => c.net)).size > 1;
     const dots = v.cols.slice(0, 5).map(c => { const [nm, hex] = colorInfo(c.k); return `<span class="dot" title="${esc(nm)}" style="background:${hex || 'repeating-linear-gradient(45deg,#e1e6f0 0 3px,#fff 3px 6px)'}"></span>`; }).join('');
     const more = v.cols.length > 5 ? `<small>+${v.cols.length - 5}</small>` : '';
@@ -885,7 +972,7 @@
       <div class="ph">${imgTag(c0.im[0], 300, p.n)}${badge}</div>
       <div class="cbody">
         <div class="cname">${esc(p.n)}</div>
-        <div class="cmeta">${esc([p.brand, p.gender, CAT[p.l3] || 'Lainnya'].filter(Boolean).join(' · '))}</div>
+        <div class="cmeta">${esc([p.brand, p.gender, CATL(p.cat)].filter(Boolean).join(' · '))}</div>
         <div class="price">${multiPrice ? '<span class="from">mulai</span>' : ''}<b class="num">${rp(v.minNet)}</b>${multiPrice || !v.cheapest.d ? '' : `<s class="num">${rp(v.cheapest.p)}</s>`}</div>
         <div class="dots">${dots}${more}<small>${v.cols.length} warna</small></div>
         <div class="avail">${avail}</div>
@@ -897,7 +984,7 @@
     const cats = ['ALL'].concat(CAT_ORDER.filter(c => cnt[c])).concat(cnt.OTHER ? ['OTHER'] : []);
     if(S.cat !== 'ALL' && !cnt[S.cat]) cats.splice(1, 0, S.cat);
     $('tabs').innerHTML = cats.map(c => {
-      const label = c === 'ALL' ? 'Semua' : (CAT[c] || 'Lainnya');
+      const label = c === 'ALL' ? 'Semua' : CATL(c);
       return `<button type="button" class="tab" role="tab" data-cat="${c}" aria-selected="${S.cat === c}">${label}<span class="tab-badge">${(cnt[c] || 0).toLocaleString('id-ID')}</span></button>`;
     }).join('');
   }
@@ -985,7 +1072,7 @@
     dlg.querySelector('.pd-inner').scrollTop = 0;
     dlg.querySelector('.pd-right').scrollTop = 0;
     dlg.querySelector('.pd-left').scrollTop = 0;
-    if(push !== false) history.replaceState(null, '', '#p=' + p.g + '-' + p.colors[ci].k);
+    if(push !== false) history.replaceState(history.state, '', '#p=' + p.g + '-' + p.colors[ci].k);
     track('view', Object.assign({src: push === false ? 'link' : 'katalog'}, storeInfo(S.store), productInfo()));
   }
 
@@ -994,7 +1081,7 @@
     const c = p.colors[ci];
     const [cname] = colorInfo(c.k);
     if(cur.size && !c.sz.includes(cur.size)) cur.size = '';
-    $('pdMeta').textContent = [p.brand, p.gender, CAT[p.l3] || 'Lainnya', p.line].filter(Boolean).join(' · ');
+    $('pdMeta').textContent = [p.brand, p.gender, CATL(p.cat), p.line].filter(Boolean).join(' · ');
     $('pdTitle').textContent = p.n;
     $('pdPrice').innerHTML = `<b class="num">${rp(c.net)}</b>` + (c.d ? `<span class="pill">-${c.d}%</span>` : '');
     $('pdSave').innerHTML = c.d ? `<s class="num">${rp(c.p)}</s><span>Hemat ${rp(c.p - c.net)}</span>` : '';
@@ -1110,12 +1197,12 @@
   $('pd').addEventListener('close', () => {
     cur = null;
     document.documentElement.classList.remove('lock');
-    if(location.hash) history.replaceState(null, '', location.pathname + location.search);
+    if(location.hash) history.replaceState(history.state, '', location.pathname + location.search);
   });
   $('pd').addEventListener('click', e => {
     if(e.target === $('pd')){ closeProduct(); return; }
     const cb = e.target.closest('[data-ci]');
-    if(cb){ cur.ci = Number(cb.dataset.ci); cur.img = 0; drawProduct(); history.replaceState(null, '', '#p=' + cur.p.g + '-' + cur.p.colors[cur.ci].k); return; }
+    if(cb){ cur.ci = Number(cb.dataset.ci); cur.img = 0; drawProduct(); history.replaceState(history.state, '', '#p=' + cur.p.g + '-' + cur.p.colors[cur.ci].k); return; }
     const sb = e.target.closest('[data-size]');
     if(sb){ cur.size = cur.size === sb.dataset.size ? '' : sb.dataset.size; drawDetailStock(); return; }
     const nb = e.target.closest('[data-nav]');
@@ -1357,6 +1444,91 @@
   window.addEventListener('resize', syncBrandbarHeight);
   syncBrandbarHeight();
 
+  // ---------- halaman awal "Mau cari apa?" ----------
+  S.browse = false;
+  function availIn(p){ return S.store < 0 || p.byStore.has(S.store); }
+  function pickPhoto(list){
+    // foto dari produk dengan stok terbanyak (di toko pilihan bila ada) yang punya foto
+    let best = null, bq = -1;
+    list.forEach(p => {
+      const c = p.colors.find(c => c.im.length); if(!c) return;
+      const q = S.store >= 0 ? (p.byStore.get(S.store) || {qty: 0}).qty : p.qty;
+      if(q > bq){ bq = q; best = c.im[0]; }
+    });
+    return best;
+  }
+  function renderLanding(){
+    const av = P.filter(availIn);
+    const nNew = av.filter(p => p.colors.some(c => c.d === 0)).length;
+    const nPromo = av.filter(p => p.colors.some(c => c.d > 0)).length;
+    const maxD = Math.max(0, ...av.flatMap(p => p.colors.map(c => c.d)));
+    const where = S.store >= 0 ? ' di ' + D.stores[S.store].name : '';
+    $('landSub').textContent = `Pilih kategori, atau lihat produk terbaru dan promo${where}.`;
+    let feat = '';
+    if(D.all && nNew) feat += `<button type="button" class="feat-card new" data-go="new"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d === 0 && c.im.length))), 120, '')}</span><span class="ft"><b>New Arrival</b><span>Produk terbaru dengan harga normal</span><small>${nNew.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
+    if(nPromo) feat += `<button type="button" class="feat-card promo" data-go="promo"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d > 0 && c.im.length))), 120, '')}</span><span class="ft"><b>Promo s.d. ${maxD}%</b><span>${esc((D.promo && D.promo.title) || 'Produk pilihan diskon')}</span><small>${nPromo.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
+    $('feat').innerHTML = feat;
+    $('feat').style.gridTemplateColumns = (feat.match(/feat-card/g) || []).length < 2 ? '1fr' : '';
+    const tile = (cat, label, list, cls) => `<button type="button" class="tile${cls ? ' ' + cls : ''}" data-go="${cat ? 'cat' : 'all'}"${cat ? ` data-cat="${cat}"` : ''}><span class="ti">${imgTag(pickPhoto(list), 300, '')}</span><span class="tl"><b>${esc(label)}</b><small>${list.length.toLocaleString('id-ID')} produk</small></span></button>`;
+    const other = av.filter(p => p.cat === 'OTHER');
+    $('tiles').innerHTML = CATS.map(c => {
+      const list = av.filter(p => p.cat === c.k);
+      return list.length ? tile(c.k, c.label, list) : '';
+    }).join('') + (other.length ? tile('OTHER', 'Lainnya', other) : '') + tile('', 'Semua produk', av, 'all');
+  }
+  function showMode(){
+    $('landing').hidden = S.browse;
+    $('browse').hidden = !S.browse;
+  }
+  function enterBrowse(o, push){
+    o = o || {};
+    S.cat = o.cat || 'ALL';
+    S.q = o.q || '';
+    $('q').value = S.q;
+    S.gender.clear(); S.size.clear();
+    S.shown = PAGE;
+    const wasLanding = !S.browse;
+    S.browse = true;
+    showMode();
+    setDisc(o.disc || 0);
+    if(push !== false && wasLanding){ try{ history.pushState({kp: 'browse'}, '', location.pathname + location.search); }catch(e){} }
+    window.scrollTo({top: Math.max(0, $('browse').getBoundingClientRect().top + window.scrollY - $('brandbar').offsetHeight - 8), behavior: 'auto'});
+  }
+  function goLanding(){
+    S.browse = false;
+    S.cat = 'ALL'; S.q = ''; $('q').value = ''; S.gender.clear(); S.size.clear();
+    S.disc = 0; $('promoBtn').setAttribute('aria-pressed', 'false');
+    $('segDisc').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === '0'));
+    showMode();
+    renderLanding();
+    render();
+    $('landing').scrollIntoView({block: 'start'});
+  }
+  $('landing').addEventListener('click', e => {
+    const b = e.target.closest('[data-go]'); if(!b) return;
+    const go = b.dataset.go;
+    if(go === 'new'){ enterBrowse({disc: -2}); track('search', {q: 'menu: new arrival', r: lastCount, src: 'menu'}); }
+    else if(go === 'promo'){ enterBrowse({disc: -1}); track('search', {q: 'menu: promo', r: lastCount, src: 'menu'}); }
+    else if(go === 'all'){ enterBrowse({}); }
+    else if(go === 'cat'){ enterBrowse({cat: b.dataset.cat}); track('search', {q: 'kategori: ' + CATL(b.dataset.cat).toLowerCase(), r: lastCount, src: 'menu'}); }
+  });
+  $('landSearch').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = $('landQ').value.trim().toLowerCase();
+    if(!q) return;
+    enterBrowse({q});
+    $('landQ').value = '';
+    lastQ = q; track('search', Object.assign({q, r: lastCount}, storeInfo(S.store)));
+  });
+  $('backBtn').addEventListener('click', () => {
+    if(history.state && history.state.kp === 'browse') history.back();
+    else goLanding();
+  });
+  window.addEventListener('popstate', () => {
+    const st = history.state;
+    if(S.browse && !(st && st.kp === 'browse')){ if($('pd').open) $('pd').close(); if($('cart').open) $('cart').close(); goLanding(); }
+  });
+
   // ---------- toko ----------
   function setStore(si, scroll){
     S.store = si;
@@ -1375,7 +1547,8 @@
     let n = 0; P.forEach(p => { if(!has || p.byStore.has(si)) n++; });
     $('fProd').textContent = n.toLocaleString('id-ID');
     render();
-    if(scroll) $('controls').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+    if(!S.browse) renderLanding();
+    if(scroll) $(S.browse ? 'controls' : 'landing').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
   }
 
   function fillStores(){
@@ -1411,10 +1584,7 @@
     const v = Number(b.dataset.v);
     setDisc(S.disc === v ? 0 : v);
   });
-  $('promoBtn').addEventListener('click', () => {
-    setDisc(S.disc !== 0 ? 0 : -1);
-    if(S.disc) $('controls').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
-  });
+  $('promoBtn').addEventListener('click', () => { enterBrowse({disc: -1}); });
   $('sort').addEventListener('change', e => { S.sort = e.target.value; S.shown = PAGE; render(); });
   $('moreBtn').addEventListener('click', () => { S.shown += PAGE; render(); });
   function resetFilters(){
@@ -1507,6 +1677,7 @@
     const discs = [...new Set(P.flatMap(p => p.colors.map(c => c.d)))].sort((a, b) => a - b);
     const promoDiscs = discs.filter(d => d > 0);
     $('segDisc').innerHTML = '<button type="button" data-v="0" aria-pressed="true">Semua</button>' +
+      (D.all ? '<button type="button" data-v="-2" aria-pressed="false">New Arrival</button>' : '') +
       (promoDiscs.length ? '<button type="button" class="promo-opt" data-v="-1" aria-pressed="false">Promo</button>' : '') +
       promoDiscs.map(d => `<button type="button" data-v="${d}" aria-pressed="false">${d}%</button>`).join('');
     const nPromo = P.filter(p => p.colors.some(c => c.d > 0)).length;
@@ -1518,7 +1689,12 @@
     const qs = new URLSearchParams(location.search).get('toko');
     if(qs){ const k = D.stores.findIndex(s => s.code === qs); if(k >= 0) si = k; }
     setStore(si, false);
-    if(new URLSearchParams(location.search).get('promo') === '1') setDisc(-1);
+    const usp = new URLSearchParams(location.search);
+    const catQ = (usp.get('kategori') || usp.get('cat') || '').toUpperCase();
+    if(usp.get('promo') === '1') enterBrowse({disc: -1}, false);
+    else if(usp.get('new') === '1') enterBrowse({disc: -2}, false);
+    else if(CAT_ORDER.includes(catQ) || catQ === 'OTHER') enterBrowse({cat: catQ}, false);
+    else { showMode(); renderLanding(); }
     track('visit', storeInfo(si));
     cartLoad();
     openFromHash();
