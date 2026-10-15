@@ -345,7 +345,7 @@
     <div class="step-no">5</div>
     <div>
       <h2 id="buildH">Buat katalog</h2>
-      <p class="desc" id="buildDesc">Stok dicocokkan dengan list promo per artikel (SKU), lalu dikelompokkan per produk dan warna lengkap dengan foto.</p>
+      <p class="desc" id="buildDesc">Stok dicocokkan dengan master artikel dan list promo per artikel (SKU), lalu dikelompokkan per produk dan warna lengkap dengan foto. <b>Hanya artikel yang punya harga yang ditampilkan.</b> Artikel tanpa harga, tidak ada di master, atau barang non-jual (paper bag, shopping bag) dianggap bukan barang jual.</p>
       <button class="btn big orange" type="button" id="buildBtn" disabled>Buat katalog</button>
       <div class="status err" id="buildErr" hidden></div>
       <div class="result" id="result">
@@ -366,6 +366,7 @@
           <li>Klik <b>Commit changes</b>, tunggu 1&ndash;2 menit, lalu buka halaman katalog dan tekan Ctrl+F5.</li>
         </ol>
         </details>
+        <div class="card" id="exclBox" style="margin:16px 0 0;padding:14px 16px" hidden></div>
         <details class="more">
           <summary>Rincian per toko</summary>
           <div class="tbl"><table class="mini" id="storeTbl"></table></div>
@@ -418,7 +419,7 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-15a';
+  const ADMIN_VERSION = '2026-10-15b';
 
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
@@ -511,7 +512,10 @@
   function masterSummary(){
     let arts = 0; const brands = new Set();
     Object.values(masterDB.items).forEach(it => { arts += Object.keys(it.a).length; if(it.b) brands.add(it.b); });
-    return `<span><b>Master aktif:</b> ${fmt(arts)} artikel berharga, ${fmt(Object.keys(masterDB.items).length)} warna${brands.size ? ', termasuk ' + fmt(brands.size) + ' brand selain EIGER' : ''}. Sumber: ${esc(masterDB.source || '-')}, dibuat ${esc(masterDB.generated || '-')}.</span>`;
+    const z = (masterDB.zero || []).length, ns = (masterDB.nonsale || []).length;
+    return `<span><b>Master aktif:</b> ${fmt(arts)} artikel berharga, ${fmt(Object.keys(masterDB.items).length)} warna${brands.size ? ', termasuk ' + fmt(brands.size) + ' brand selain EIGER' : ''}.` +
+      (z || ns ? ` Dilewati: ${fmt(z)} artikel tanpa harga dan ${fmt(ns)} barang non-jual.` : '') +
+      ` Sumber: ${esc(masterDB.source || '-')}, dibuat ${esc(masterDB.generated || '-')}.</span>`;
   }
   async function loadMasterJson(){
     try{
@@ -641,6 +645,7 @@
       if(t){ title = t.replace(/^promo\s*:\s*/i, '').trim(); break; }
     }
     const items = {};
+    const zero = [], nonsale = [];   // hanya untuk master: artikel tanpa harga & barang non-jual
     let n = 0;
     for(let i = h + 1; i < rows.length; i++){
       const r = rows[i];
@@ -649,12 +654,13 @@
       const price = Number(r[c.price]);
       let disc = needDisc ? Number(r[c.disc]) : 0;
       if(disc > 1) disc = disc / 100;
-      if(!(price > 0)) continue;
+      // ATURAN: artikel tanpa harga (Loc Amount kosong / 0) bukan barang jual, tidak ditampilkan
+      if(!(price > 0)){ if(!needDisc) zero.push(art); continue; }
       if(needDisc && !(disc > 0)) continue;
       if(!needDisc) disc = 0;
       const desc = norm(r[c.desc]);
       // barang non-jual di master (paper bag, drawstring, shopping bag) tidak ditampilkan ke customer
-      if(!needDisc && ((c.at >= 0 && /^ZFCB$/i.test(norm(r[c.at]))) || (c.pc >= 0 && /shopping bag/i.test(norm(r[c.pc]))) || /^(paper bag|shopping bag)\b/i.test(desc))) continue;
+      if(!needDisc && ((c.at >= 0 && /^ZFCB$/i.test(norm(r[c.at]))) || (c.pc >= 0 && /shopping bag/i.test(norm(r[c.pc]))) || /^(paper bag|shopping bag)\b/i.test(desc))){ nonsale.push(art); continue; }
       const parts = desc.split(',').map(s => s.trim());
       const ok = parts.length >= 3;
       let cs = c.cs >= 0 ? norm(r[c.cs]) : '';
@@ -671,7 +677,9 @@
       n++;
     }
     if(!n) throw new Error((needDisc ? 'Tidak ada artikel dengan harga dan diskon di sheet ' : 'Tidak ada artikel berharga di sheet ') + sheet);
-    return {v:1, generated: today(), source: fname, sheet, title, period:'', items};
+    const out = {v:1, generated: today(), source: fname, sheet, title, period:'', items};
+    if(!needDisc){ out.zero = zero; out.nonsale = nonsale; }
+    return out;
   }
 
   async function onPromoBuild(){
@@ -791,7 +799,7 @@
       if(h < 0) throw new Error('Kolom "SKU Code" tidak ditemukan.');
       const head = rows[h];
       const c = {
-        sku: findCol(head, /^sku code$/i), name: findCol(head, /^sku name$/i),
+        sku: findCol(head, /^sku code$/i), name: findCol(head, /^sku name$/i), brand: findCol(head, /^brand$/i),
         zone: findCol(head, /^zone code$/i), cat: findCol(head, /^bin category$/i),
         qty: findCol(head, /^available qty$/i), loc: findCol(head, /^location$/i)
       };
@@ -851,17 +859,29 @@
     const artBy = new Map();        // cs -> Map(size -> Set(artikel 12 digit)), untuk pesan WA
     const nameFallback = new Map(); // cs -> nama dari file stok
     let skippedBaz = 0;
+    // stok yang tidak ditampilkan karena bukan barang jual: artikel -> {nama, brand, alasan, pcs, toko}
+    const zeroSet = new Set((masterDB && masterDB.zero) || []), nonSet = new Set((masterDB && masterDB.nonsale) || []);
+    const excluded = new Map();
+    const exclude = (art, r, reason, qty) => {
+      let e = excluded.get(art);
+      if(!e){ e = {art, name: c.name >= 0 ? norm(r[c.name]) : '', brand: c.brand >= 0 ? norm(r[c.brand]) : '', reason, qty: 0, stores: new Set()}; excluded.set(art, e); }
+      e.qty += qty; e.stores.add(norm(r[c.loc]));
+    };
     rows.forEach(r => {
       const qty = Number(r[c.qty]);
       if(!(qty > 0)) return;
       if(!zones.has(norm(r[c.zone]) || '(kosong)')) return;
       if(c.cat >= 0){ const cat = norm(r[c.cat]); if(cat && !/saleable/i.test(cat)) return; }
       const art = norm(r[c.sku]);
-      const hit = artMap.get(art);
-      if(!hit) return;
       const loc = norm(r[c.loc]);
       if(SKIP_LOCATION.test(loc)){ skippedBaz += qty; return; }
+      const hit = artMap.get(art);
+      if(!hit){
+        exclude(art, r, zeroSet.has(art) ? 'zero' : nonSet.has(art) ? 'nonsale' : masterDB ? 'nomaster' : 'nopromo', qty);
+        return;
+      }
       const [cs] = hit;
+      if(!(DB[cs].p > 0)){ exclude(art, r, 'zero', qty); return; }
       let size = hit[1];
       if(!size || !DB[cs].n){
         const parts = c.name >= 0 ? norm(r[c.name]).split(',').map(s => s.trim()) : [];
@@ -948,6 +968,7 @@
         stores: storesOut,
         items
       },
+      excluded: [...excluded.values()].sort((a, b) => b.qty - a.qty),
       stats: {promoProducts: items.filter(p => p.c.some(c => c.d > 0)).length, products: items.length, colors: agg.size, stores: storesOut.length, qty: totalQty, noPhoto, promoArts, skippedBaz, storeQty, storeProd: storeProd.map(s => s.size)}
     };
   }
@@ -1159,6 +1180,33 @@
   $('promoPub').addEventListener('click', () => promoDB && publishJson('promo.json', promoDB, $('promoPub'), $('promoPubStatus'), 'list promo'));
   $('fotoPub').addEventListener('click', () => imgDB && publishJson('gambar.json', imgDB, $('fotoPub'), $('fotoPubStatus'), 'master foto'));
 
+  const EXCL_REASON = {
+    zero: ['Tidak ada harga di master', 'Loc Amount kosong atau 0, dianggap bukan barang jual.'],
+    nomaster: ['Tidak ada di master artikel', 'Tidak ditemukan di master, jadi tidak ada harga. Contoh: brand di luar master (BODYPACK), perlengkapan toko.'],
+    nonsale: ['Barang non-jual', 'Article Type ZFCB / Shopping Bag di master (paper bag, drawstring, shopping bag).'],
+    nopromo: ['Tidak ada di list promo', 'Master artikel belum aktif, jadi hanya barang promo yang ditampilkan.']
+  };
+  let lastExcluded = [];
+  function renderExcluded(list){
+    const box = $('exclBox');
+    if(!list.length){ box.hidden = true; return; }
+    const by = {};
+    list.forEach(e => { const o = by[e.reason] || (by[e.reason] = {sku: 0, qty: 0}); o.sku++; o.qty += e.qty; });
+    box.hidden = false;
+    box.innerHTML = `<h3 style="margin:0 0 2px;font-size:15px">Tidak ditampilkan ke customer</h3>
+      <p class="sub" style="margin:0 0 8px">Stok di bawah ini ada di toko, tapi disaring karena dianggap bukan barang jual.</p>
+      <table class="mini"><thead><tr><th>Alasan</th><th style="text-align:right">SKU</th><th style="text-align:right">Pcs</th></tr></thead><tbody>` +
+      Object.entries(by).sort((a, b) => b[1].qty - a[1].qty).map(([r, o]) => `<tr><td class="wrap"><b>${esc(EXCL_REASON[r][0])}</b><div class="muted">${esc(EXCL_REASON[r][1])}</div></td><td class="n">${fmt(o.sku)}</td><td class="n">${fmt(o.qty)}</td></tr>`).join('') +
+      `</tbody></table>
+      <div class="actions" style="margin-top:10px"><button class="btn ghost" type="button" id="exclDl">Unduh daftar SKU yang disaring (Excel)</button></div>`;
+    $('exclDl').onclick = () => {
+      const aoa = [['SKU', 'Nama', 'Brand', 'Alasan', 'Pcs', 'Jumlah toko']].concat(lastExcluded.map(e => [e.art, e.name, e.brand, EXCL_REASON[e.reason][0], e.qty, e.stores.size]));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Tidak ditampilkan');
+      XLSX.writeFile(wb, `SKU_tidak_ditampilkan_${$('stockDate').value || today()}.xlsx`);
+    };
+  }
+
   async function onBuild(){
     $('buildErr').hidden = true;
     if(!masterDB && !confirm('Master artikel (master.json) belum terbaca, jadi katalog hanya berisi barang promo.\n\nTetap buat katalog hanya barang promo?')) return;
@@ -1167,7 +1215,9 @@
     $('buildBtn').textContent = 'Memproses…';
     await nextFrame();
     try{
-      const {katalog: k, stats} = buildKatalog();
+      const {katalog: k, stats, excluded} = buildKatalog();
+      lastExcluded = excluded;
+      renderExcluded(excluded);
       katalog = k;
       $('stats').innerHTML = `
         <div class="stat"><div class="num">${fmt(stats.products)}</div><div class="lbl">Produk tampil (${fmt(stats.colors)} warna, ${fmt(stats.promoProducts)} promo)</div></div>
