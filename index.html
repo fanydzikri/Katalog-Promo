@@ -89,16 +89,16 @@
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
   html.lock,html.lock body{overflow:hidden;}
   .fb-label{font-size:12px;color:var(--ink-soft);font-weight:700;}
-  .search-input{border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px 8px 34px;font-size:13.5px;width:260px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235A6482' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center;color:var(--ink);}
+  .search-input{border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px 8px 34px;font-size:13.5px;width:220px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235A6482' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center;color:var(--ink);}
   .search-input:focus,.sel:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-tint);}
   .sel{border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;font-size:13.5px;background:#fff;color:var(--ink);cursor:pointer;}
   .seg{display:inline-flex;background:var(--navy-tint);border-radius:8px;padding:3px;}
-  .seg button{border:none;background:none;font-weight:700;font-size:13px;color:var(--navy);padding:6px 11px;border-radius:6px;cursor:pointer;white-space:nowrap;}
+  .seg button{border:none;background:none;font-weight:700;font-size:13px;color:var(--navy);padding:6px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;}
   .seg button[aria-pressed="true"]{background:var(--navy);color:#fff;}
   .seg button:focus-visible{outline:3px solid var(--orange);outline-offset:1px;}
 
   .ms{position:relative;}
-  .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;font-size:13.5px;background:#fff;color:var(--ink);width:170px;cursor:pointer;text-align:left;}
+  .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;font-size:13.5px;background:#fff;color:var(--ink);width:150px;cursor:pointer;text-align:left;}
   .ms-btn:hover{border-color:var(--navy);}
   .ms-btn .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ms-btn .chev{font-size:10px;color:var(--ink-soft);}
@@ -405,8 +405,8 @@
     .fb-more .ms-item:has(input:checked){border-color:var(--navy);background:var(--navy-tint);color:var(--navy);}
     .fb-more .ms-sizes{padding:0;gap:8px;}
     .fb-more .ms-sizes span{min-width:50px;padding:9px 10px;font-size:14px;border-radius:8px;}
-    .fb-more .seg{display:flex;flex-wrap:wrap;}
-    .fb-more .seg button{flex:1;padding:10px 4px;font-size:13.5px;}
+    .fb-more .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+    .fb-more .seg button{padding:10px 4px;font-size:14px;}
     .fb-more .sel{width:100%;font-size:16px;padding:11px 12px;}
 
     .result-bar{margin:12px 2px 10px;font-size:13px;}
@@ -505,9 +505,9 @@
       <div class="sheet-head"><b>Filter &amp; urutkan</b><button type="button" data-sheet="close" aria-label="Tutup filter">&times;</button></div>
       <div class="fb-field"><span class="fb-label">Untuk</span><div class="ms" id="msGender"></div></div>
       <div class="fb-field"><span class="fb-label">Ukuran</span><div class="ms right" id="msSize"></div></div>
-      <div class="fb-field"><span class="fb-label">Diskon minimal</span>
-        <div class="seg" id="segDisc" role="group" aria-label="Diskon minimal">
-          <button type="button" data-v="0" aria-pressed="true">Semua</button><button type="button" data-v="20" aria-pressed="false">20%+</button><button type="button" data-v="30" aria-pressed="false">30%+</button><button type="button" data-v="40" aria-pressed="false">40%+</button><button type="button" data-v="50" aria-pressed="false">50%</button>
+      <div class="fb-field"><span class="fb-label">Diskon</span>
+        <div class="seg" id="segDisc" role="group" aria-label="Besaran diskon">
+          <button type="button" data-v="0" aria-pressed="true">Semua</button>
         </div>
       </div>
       <div class="fb-field"><label class="fb-label" for="sort">Urutkan</label>
@@ -766,6 +766,13 @@
     }else{
       cols = p.colors; sizes = p.allSizes;
     }
+    if(S.disc){
+      cols = cols.filter(c => c.d === S.disc);
+      if(!cols.length) return null;
+      // ukuran dihitung ulang hanya dari warna yang lolos filter diskon
+      sizes = new Set();
+      cols.forEach(c => c.st.forEach(r => { if(S.store >= 0 && r[0] !== S.store) return; r.slice(1).forEach((q, k) => { if(q > 0) sizes.add(c.sz[k]); }); }));
+    }
     const minNet = Math.min(...cols.map(c => c.net));
     const maxD = Math.max(...cols.map(c => c.d));
     const minD = Math.min(...cols.map(c => c.d));
@@ -779,7 +786,6 @@
     if(S.q){ const words = S.q.split(/\s+/).filter(Boolean); if(!words.every(w => p.search.includes(w))) return false; }
     if(skip !== 'gender' && S.gender.size && !S.gender.has(p.gender)) return false;
     if(skip !== 'size' && S.size.size && ![...S.size].some(s => v.sizes.has(s))) return false;
-    if(S.disc && v.maxD < S.disc) return false;
     return true;
   }
 
@@ -1365,8 +1371,9 @@
   });
   $('segDisc').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
-    S.disc = Number(b.dataset.v); S.shown = PAGE;
-    $('segDisc').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    const v = Number(b.dataset.v);
+    S.disc = S.disc === v ? 0 : v; S.shown = PAGE;
+    $('segDisc').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', Number(x.dataset.v) === S.disc));
     render();
   });
   $('sort').addEventListener('change', e => { S.sort = e.target.value; S.shown = PAGE; render(); });
@@ -1457,6 +1464,9 @@
     $('footDate').textContent = 'Stok per ' + fmtDate(D.stockDate);
     $('noteTxt').textContent = `Stok per ${fmtDate(D.stockDate)}, diperbarui setiap hari dan bisa berubah sewaktu-waktu. Harga sudah termasuk diskon dan berlaku selama persediaan masih ada, sesuai ketentuan promo di toko.`;
     fillStores();
+    const discs = [...new Set(P.flatMap(p => p.colors.map(c => c.d)))].sort((a, b) => a - b);
+    $('segDisc').innerHTML = '<button type="button" data-v="0" aria-pressed="true">Semua</button>' +
+      discs.map(d => `<button type="button" data-v="${d}" aria-pressed="false">${d}%</button>`).join('');
     let si = -1;
     try{ const code = localStorage.getItem('katalogStore'); if(code) si = D.stores.findIndex(s => s.code === code); }catch(e){}
     const qs = new URLSearchParams(location.search).get('toko');
