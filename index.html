@@ -500,15 +500,16 @@
     .feat-card{min-height:0;padding:12px 14px;}
     .feat-card .fi{width:52px;height:52px;}
     .feat-card .ft b{font-size:17px;}
-    .tiles{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px 8px;scroll-snap-type:x proximity;scrollbar-width:none;}
-    .tiles::-webkit-scrollbar{display:none;}
-    .tile{flex:0 0 104px;scroll-snap-align:start;}
+    .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+    .tiles[data-n="3"],.tiles[data-n="5"],.tiles[data-n="6"],.tiles[data-n="9"]{grid-template-columns:repeat(3,minmax(0,1fr));}
     .subs{margin:0 -14px 2px;padding:2px 14px 10px;}
     .sub{font-size:12.5px;}
-    .tile{border-radius:12px;}
-    .tile .tl{padding:7px 4px 6px;}
-    .tile .tl b{font-size:12px;}
-    .tile .tl small{font-size:10px;}
+    .tile{border-radius:10px;}
+    .tile:hover{transform:none;box-shadow:none;}
+    .tile .ti{padding:6px;}
+    .tile .tl{padding:5px 2px 5px;min-height:44px;flex:1;display:flex;flex-direction:column;justify-content:center;}
+    .tile .tl b{font-size:10px;letter-spacing:-.01em;white-space:normal;line-height:1.1;}
+    .tile .tl small{font-size:9px;margin-top:1px;}
     .promo-card .hero-disc .big{font-size:46px;}
     .pc-txt b{font-size:14.5px;}
     .pc-btn{width:100%;justify-content:center;padding:11px;}
@@ -590,6 +591,8 @@
     .to-top{bottom:calc(20px + env(safe-area-inset-bottom,0px));}
   }
   @media (max-width:380px){
+    .tile .tl b{font-size:9px;}
+    .tile .tl small{font-size:8.5px;}
     .pd-cta .wa-st{display:none;}
   }
   @media (max-width:360px){
@@ -1651,11 +1654,11 @@
     const where = S.store >= 0 ? ' di ' + D.stores[S.store].name : '';
     $('landSub').textContent = `Pilih kategori, atau lihat koleksi utama dan promo${where}.`;
     let feat = '';
-    if(D.all && nNew) feat += `<button type="button" class="feat-card new" data-go="new"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d === 0 && c.im.length))), 120, '')}</span><span class="ft"><b>Koleksi Utama</b><span>Produk pilihan dengan harga normal</span><small>${nNew.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
-    if(nPromo) feat += `<button type="button" class="feat-card promo" data-go="promo"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d > 0 && c.im.length))), 120, '')}</span><span class="ft"><b>Promo s.d. ${maxD}%</b><span>${esc((D.promo && D.promo.title) || 'Produk pilihan diskon')}</span><small>${nPromo.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
+    const used = new Set();
+    if(D.all && nNew) feat += `<button type="button" class="feat-card new" data-go="new"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d === 0 && c.im.length)), /^jacket$|^backpack$/, used), 120, '')}</span><span class="ft"><b>Koleksi Utama</b><span>Produk pilihan dengan harga normal</span><small>${nNew.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
+    if(nPromo) feat += `<button type="button" class="feat-card promo" data-go="promo"><span class="fi">${imgTag(pickPhoto(av.filter(p => p.colors.some(c => c.d > 0 && c.im.length)), /^shoes$|^backpack$/, used), 120, '')}</span><span class="ft"><b>Promo s.d. ${maxD}%</b><span>${esc((D.promo && D.promo.title) || 'Produk pilihan diskon')}</span><small>${nPromo.toLocaleString('id-ID')} produk</small></span><span class="fa" aria-hidden="true">&rarr;</span></button>`;
     $('feat').innerHTML = feat;
     $('feat').style.gridTemplateColumns = (feat.match(/feat-card/g) || []).length < 2 ? '1fr' : '';
-    const used = new Set();
     const tile = (cat, label, list, cls, pref) => `<button type="button" class="tile${cls ? ' ' + cls : ''}" data-go="${cat ? 'cat' : 'all'}"${cat ? ` data-cat="${cat}"` : ''}><span class="ti">${imgTag(pickPhoto(list, pref, used), 300, '')}</span><span class="tl"><b>${esc(label)}</b><small>${list.length.toLocaleString('id-ID')} produk</small></span></button>`;
     const other = av.filter(p => p.cat === 'OTHER');
     const extra = [...new Set(av.map(p => p.cat))].filter(c => c !== 'OTHER' && !L3_ORDER.includes(c)).sort();
