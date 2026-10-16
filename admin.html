@@ -419,7 +419,7 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-15b';
+  const ADMIN_VERSION = '2026-10-15c';
 
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
@@ -529,7 +529,11 @@
         $('masterMore').open = true; refreshReady(); return;
       }
       masterDB = j;
-      setStatus($('masterStatus'), 'ok', masterSummary());
+      const hasL4 = Object.values(j.items).some(it => it.l4);
+      if(!hasL4){
+        setStatus($('masterStatus'), 'warn', masterSummary() + ' <span><b>master.json ini belum berisi sub-kategori (MC Lv4).</b> Pilih ulang file master artikel di bawah lalu terbitkan master.json, supaya customer bisa memilih sub-kategori.</span>');
+        $('masterMore').open = true;
+      }else setStatus($('masterStatus'), 'ok', masterSummary());
     }catch(e){
       setStatus($('masterStatus'), 'warn', '<span><b>master.json belum ada di repo.</b> Tanpa master artikel, katalog hanya berisi barang promo. Pilih file master artikel di bawah untuk menampilkan semua produk.</span>');
       $('masterMore').open = true;
@@ -629,6 +633,7 @@
       desc: findCol(head, /^article description$/i),
       l2: findCol(head, /^lv2[\s-]*desc/i),
       l3: findCol(head, /^lv3[\s-]*desc/i),
+      l4: findCol(head, /^lv4[\s-]*desc/i),
       pt: findCol(head, /^product type$/i),
       gd: findCol(head, /^gender$/i),
       br: findCol(head, /^brand$/i),
@@ -667,7 +672,7 @@
       if(cs.indexOf('.') < 1) cs = art.slice(0, 9) + '.' + (ok ? parts[parts.length - 2] : 'NOC');
       const it = items[cs] || (items[cs] = {
         n: ok ? parts.slice(0, -2).join(', ') : '',
-        l2: c.l2 >= 0 ? norm(r[c.l2]) : '', l3: c.l3 >= 0 ? norm(r[c.l3]) : '',
+        l2: c.l2 >= 0 ? norm(r[c.l2]) : '', l3: c.l3 >= 0 ? norm(r[c.l3]) : '', l4: c.l4 >= 0 ? norm(r[c.l4]) : '',
         pt: c.pt >= 0 ? norm(r[c.pt]) : '', gd: c.gd >= 0 ? norm(r[c.gd]) : '',
         p: Math.round(price), d: Math.round(disc * 100), a: {}
       });
@@ -936,7 +941,7 @@
       if(!im.length) noPhoto++;
       let prod = byGen.get(g);
       if(!prod){
-        prod = {g, n: it.n || nameFallback.get(cs) || g, l2: it.l2, l3: it.l3, pt: it.pt, gd: it.gd, c: [], _q: 0, _d: 0};
+        prod = {g, n: it.n || nameFallback.get(cs) || g, l2: it.l2, l3: it.l3, l4: it.l4 || '', pt: it.pt, gd: it.gd, c: [], _q: 0, _d: 0};
         if(it.b) prod.b = it.b;
         byGen.set(g, prod);
       }
