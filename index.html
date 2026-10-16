@@ -107,9 +107,7 @@
   .feat-card .ft span{font-size:13px;opacity:.88;}
   .feat-card .ft small{display:block;font-size:12.5px;font-weight:700;margin-top:4px;opacity:.95;}
   .feat-card .fa{font-size:24px;font-weight:800;flex:none;}
-  .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
-  .tiles[data-n="9"],.tiles[data-n="10"]{grid-template-columns:repeat(5,minmax(0,1fr));}
-  .tiles[data-n="11"],.tiles[data-n="12"]{grid-template-columns:repeat(6,minmax(0,1fr));}
+  .tiles{display:grid;grid-template-columns:repeat(var(--n,8),minmax(0,1fr));gap:10px;}
   .subs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 0 4px;scrollbar-width:thin;}
   .sub{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-strong);background:#fff;border-radius:999px;padding:4px 12px 4px 4px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;}
   .sub[data-sub=""]{padding-left:12px;}
@@ -127,10 +125,25 @@
   .tile{display:flex;flex-direction:column;border:none;padding:0;background:#E9ECF1;border-radius:14px;overflow:hidden;cursor:pointer;font-family:inherit;text-align:center;transition:transform .15s ease,box-shadow .15s ease;}
   .tile:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(11,27,74,.14);}
   .tile:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
-  .tile .ti{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:8px;}
+  .tile .ti{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:10px;}
   .tile .ti img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;}
-  .tile .tl{background:var(--navy-ink);color:#fff;padding:9px 6px 8px;line-height:1.15;}
-  .tile .tl b{display:block;font-size:14px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.02em;}
+  .tile .tl{background:var(--navy-ink);color:#fff;padding:7px 4px 6px;line-height:1.15;}
+  .tile .tl b{display:block;font-size:12.5px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tile.on{box-shadow:0 0 0 3px var(--orange);}
+
+  /* ---------- Dropdown sub-kategori (MC Lv4) saat kursor di atas kategori ---------- */
+  .l4menu{position:absolute;z-index:60;background:#fff;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 16px 40px rgba(11,27,74,.2);padding:8px;min-width:220px;max-width:min(460px,calc(100vw - 24px));max-height:380px;overflow-y:auto;}
+  .l4menu[hidden]{display:none;}
+  .l4menu .mh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 8px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;}
+  .l4menu .mh b{font-size:13.5px;color:var(--navy-ink);font-weight:800;}
+  .l4menu .mh button{border:none;background:none;color:var(--orange-deep);font-weight:700;font-size:12.5px;cursor:pointer;padding:0;font-family:inherit;}
+  .l4menu .ml{display:grid;grid-template-columns:1fr;gap:1px;}
+  .l4menu.two .ml{grid-template-columns:1fr 1fr;column-gap:6px;}
+  .l4menu .mi{display:flex;justify-content:space-between;align-items:center;gap:10px;border:none;background:none;text-align:left;padding:7px 8px;border-radius:7px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;}
+  .l4menu .mi:hover,.l4menu .mi:focus-visible{background:var(--navy-tint);color:var(--navy);outline:none;}
+  .l4menu .mi[aria-current="true"]{background:var(--navy);color:#fff;}
+  .l4menu .mi small{font-size:11px;color:var(--ink-soft);font-weight:700;}
+  .l4menu .mi[aria-current="true"] small{color:#D3DBF3;}
   .tile .tl small{display:block;font-size:11px;color:#9FB0E3;margin-top:2px;font-weight:600;}
   .land-all{text-align:center;margin-top:20px;}
   .back-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);background:#fff;color:var(--navy);font-weight:700;font-size:13px;border-radius:999px;padding:6px 12px 6px 10px;cursor:pointer;font-family:inherit;}
@@ -440,8 +453,9 @@
     .feat-card{min-height:0;padding:12px 14px;}
     .feat-card .fi{width:52px;height:52px;}
     .feat-card .ft b{font-size:17px;}
-    .tiles,.tiles[data-n]{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-    .tiles[data-n="9"],.tiles[data-n="12"]{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .tiles{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px 8px;scroll-snap-type:x proximity;scrollbar-width:none;}
+    .tiles::-webkit-scrollbar{display:none;}
+    .tile{flex:0 0 104px;scroll-snap-align:start;}
     .subs{margin:0 -14px 2px;padding:2px 14px 10px;}
     .sub{font-size:12.5px;}
     .tile{border-radius:12px;}
@@ -1512,6 +1526,7 @@
     }).join('') + (other.length ? tile('OTHER', 'Lainnya', other) : '') + tile('', 'Semua produk', av, 'all', /^backpack$|^jacket$/);
     const n = $('tiles').children.length;
     $('tiles').dataset.n = n;
+    $('tiles').style.setProperty('--n', n);
   }
   function showMode(){
     $('landing').hidden = S.browse;
@@ -1544,6 +1559,7 @@
   }
   $('landing').addEventListener('click', e => {
     const b = e.target.closest('[data-go]'); if(!b) return;
+    hideMenu(true);
     const go = b.dataset.go;
     if(go === 'new'){ enterBrowse({disc: -2}); track('search', {q: 'menu: koleksi utama', r: lastCount, src: 'menu'}); }
     else if(go === 'promo'){ enterBrowse({disc: -1}); track('search', {q: 'menu: promo', r: lastCount, src: 'menu'}); }
@@ -1566,6 +1582,85 @@
     const st = history.state;
     if(S.browse && !(st && st.kp === 'browse')){ if($('pd').open) $('pd').close(); if($('cart').open) $('cart').close(); goLanding(); }
   });
+
+  // ---------- dropdown sub-kategori (MC Lv4) saat kursor di atas kategori (Lv3) ----------
+  const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+  const menu = document.createElement('div');
+  menu.className = 'l4menu'; menu.hidden = true; menu.setAttribute('role', 'menu');
+  document.body.appendChild(menu);
+  let menuFor = null, menuT = null;
+  function l4Groups(cat){
+    // di halaman awal: semua produk yang tersedia di toko pilihan; di daftar produk: ikut filter yang sedang aktif
+    const m = new Map();
+    P.forEach(p => {
+      if(p.cat !== cat || !p.l4) return;
+      if(S.browse){ const v = view(p); if(!v || !matches(p, v, 'cat')) return; }
+      else if(!availIn(p)) return;
+      m.set(p.l4, (m.get(p.l4) || 0) + 1);
+    });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }
+  function showMenu(el){
+    const cat = el.dataset.cat;
+    if(!cat || cat === 'ALL' || cat === 'OTHER') return hideMenu(true);
+    const groups = l4Groups(cat);
+    if(!groups.length) return hideMenu(true);
+    clearTimeout(menuT);
+    if(menuFor !== el){ document.querySelectorAll('.tile.on').forEach(t => t.classList.remove('on')); }
+    menuFor = el;
+    if(el.classList.contains('tile')) el.classList.add('on');
+    const curSub = S.browse && S.cat === cat ? S.sub : null;
+    const total = groups.reduce((a, g) => a + g[1], 0);
+    menu.classList.toggle('two', groups.length > 9);
+    menu.innerHTML = `<div class="mh"><b>${esc(CATL(cat))}</b><button type="button" data-mcat="${esc(cat)}" data-msub="">Lihat semua (${total.toLocaleString('id-ID')})</button></div>` +
+      `<div class="ml">` + groups.map(([k, n]) => `<button type="button" class="mi" role="menuitem" data-mcat="${esc(cat)}" data-msub="${esc(k)}" aria-current="${curSub === k}">${esc(titleCase(k))}<small>${n.toLocaleString('id-ID')}</small></button>`).join('') + `</div>`;
+    menu.hidden = false;
+    placeMenu();
+  }
+  function placeMenu(){
+    if(!menuFor) return;
+    const r = menuFor.getBoundingClientRect();
+    if(r.bottom < 0 || r.top > window.innerHeight){ hideMenu(true); return; }
+    const w = menu.offsetWidth;
+    let left = r.left + window.scrollX;
+    left = Math.max(window.scrollX + 12, Math.min(left, window.scrollX + document.documentElement.clientWidth - w - 12));
+    menu.style.left = left + 'px';
+    menu.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  }
+  function hideMenu(now){
+    clearTimeout(menuT);
+    const go = () => { menu.hidden = true; menuFor = null; document.querySelectorAll('.tile.on').forEach(t => t.classList.remove('on')); };
+    if(now) go(); else menuT = setTimeout(go, 180);
+  }
+  function bindMenu(container, selector){
+    container.addEventListener('mouseover', e => {
+      if(!canHover.matches) return;
+      const el = e.target.closest(selector);
+      if(el && el !== menuFor) showMenu(el);
+      else if(el) clearTimeout(menuT);
+    });
+    container.addEventListener('mouseout', e => {
+      if(!canHover.matches) return;
+      const to = e.relatedTarget;
+      if(to && (menu.contains(to) || (menuFor && menuFor.contains(to)))) return;
+      hideMenu(false);
+    });
+  }
+  bindMenu($('tiles'), '.tile[data-cat]');
+  bindMenu($('tabs'), '.tab[data-cat]');
+  menu.addEventListener('mouseover', () => clearTimeout(menuT));
+  menu.addEventListener('mouseout', e => { const to = e.relatedTarget; if(to && (menu.contains(to) || (menuFor && menuFor.contains(to)))) return; hideMenu(false); });
+  menu.addEventListener('click', e => {
+    const b = e.target.closest('[data-mcat]'); if(!b) return;
+    const cat = b.dataset.mcat, sub = b.dataset.msub;
+    hideMenu(true);
+    if(!S.browse) enterBrowse({cat, sub});
+    else { S.cat = cat; S.sub = sub; S.shown = PAGE; render(); }
+    track('search', {q: 'kategori: ' + CATL(cat).toLowerCase() + (sub ? ' / ' + titleCase(sub).toLowerCase() : ''), r: lastCount, src: 'menu'});
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !menu.hidden) hideMenu(true); });
+  window.addEventListener('scroll', () => { if(!menu.hidden) placeMenu(); }, {passive: true});
+  window.addEventListener('resize', () => hideMenu(true));
 
   // ---------- toko ----------
   function setStore(si, scroll){
@@ -1603,7 +1698,7 @@
     $('picker').scrollIntoView({behavior: 'smooth', block: 'center'});
     setTimeout(() => $('storeSel').focus({preventScroll: true}), 350);
   });
-  $('tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if(!t) return; S.cat = t.dataset.cat; S.sub = ''; S.shown = PAGE; render(); });
+  $('tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if(!t) return; hideMenu(true); S.cat = t.dataset.cat; S.sub = ''; S.shown = PAGE; render(); });
   $('subs').addEventListener('click', e => {
     const b = e.target.closest('.sub'); if(!b) return;
     S.sub = b.dataset.sub; S.shown = PAGE; render();
