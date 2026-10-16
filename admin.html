@@ -175,6 +175,25 @@
   .setup code{font-family:'JetBrains Mono',monospace;background:var(--navy-tint);border-radius:4px;padding:1px 5px;font-size:12px;}
   @media (max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr);} .an-grid{grid-template-columns:1fr;} }
 
+  /* ---------- Banner ---------- */
+  .bn-add{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .bn-prev{display:grid;grid-template-columns:1fr 200px;gap:16px;margin-top:14px;align-items:start;}
+  .pv-d,.pv-m,.bn-thumb{position:relative;overflow:hidden;background:#0A1640;border-radius:10px;}
+  .pv-m{width:200px;border-radius:12px;}
+  .pv-d .bg,.pv-m .bg,.bn-thumb .bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(16px) brightness(.7);}
+  .pv-d img,.pv-m img,.bn-thumb img{position:relative;display:block;width:100%;height:100%;object-fit:contain;}
+  .bn-row{display:grid;grid-template-columns:200px 1fr auto;gap:14px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;background:#fff;}
+  .bn-row.off{opacity:.55;}
+  .bn-thumb{width:200px;height:90px;}
+  .bn-row .row{margin-top:0;}
+  .bn-row .field input,.bn-row .field select{min-width:0;}
+  .bn-ctl{display:flex;flex-direction:column;gap:6px;}
+  .bn-ctl .btn{padding:6px 10px;font-size:12.5px;}
+  .bn-tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--orange-tint);color:var(--orange-deep);margin-left:6px;}
+  .chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;}
+  .chk input{accent-color:var(--orange);width:16px;height:16px;}
+  @media (max-width:700px){ .bn-add,.bn-prev{grid-template-columns:1fr;} .bn-row{grid-template-columns:1fr;} .bn-thumb{width:100%;height:120px;} }
+
   footer{border-top:1px solid var(--line);background:var(--panel);color:var(--ink-soft);font-size:12px;}
   footer .wrap{padding-top:16px;padding-bottom:18px;}
   footer strong{color:var(--navy);}
@@ -218,6 +237,7 @@
 
   <div class="tabs" role="tablist">
     <button type="button" class="tab" role="tab" id="tabUpd" aria-selected="true" aria-controls="panelUpdate">Update katalog</button>
+    <button type="button" class="tab" role="tab" id="tabBn" aria-selected="false" aria-controls="panelBanner">Banner promo</button>
     <button type="button" class="tab" role="tab" id="tabAn" aria-selected="false" aria-controls="panelAnalisa">Analisa pengunjung</button>
   </div>
 
@@ -376,6 +396,48 @@
   </section>
   </div>
 
+  <div id="panelBanner" role="tabpanel" aria-labelledby="tabBn" hidden>
+    <section class="card">
+      <h3>Banner di halaman customer</h3>
+      <p class="sub">Banner tampil di bagian paling atas katalog. Bila lebih dari satu, banner bergeser otomatis setiap 6 detik. Gambar tidak dipotong: di PC tinggi banner dibatasi dan sisi kosong diisi versi buram gambar yang sama, di HP gambar tampil utuh selebar layar.</p>
+      <div class="status" id="bnStatus">Memuat banner&hellip;</div>
+      <div id="bnList"></div>
+    </section>
+
+    <section class="card">
+      <h3>Tambah banner baru</h3>
+      <p class="sub">Format JPG atau PNG. Ukuran ideal: <b>PC 1920&times;640</b> (lebar dan pendek) dan <b>HP 1080&times;1080</b>. Poster landscape (misalnya A4) juga bisa dipakai. Gambar otomatis diperkecil supaya ringan dibuka.</p>
+      <div class="bn-add">
+        <label class="dropzone" id="bnDropD">
+          <input type="file" id="bnFileD" accept="image/jpeg,image/png,image/webp">
+          <div class="dz-title">Gambar banner (wajib)</div>
+          <div class="dz-sub" id="bnInfoD">Dipakai di PC, dan juga di HP bila gambar HP tidak diisi.</div>
+        </label>
+        <label class="dropzone" id="bnDropM">
+          <input type="file" id="bnFileM" accept="image/jpeg,image/png,image/webp">
+          <div class="dz-title">Gambar khusus HP (opsional)</div>
+          <div class="dz-sub" id="bnInfoM">Disarankan persegi atau tegak, supaya teks terbaca jelas di HP.</div>
+        </label>
+      </div>
+      <div class="bn-prev" id="bnPrev" hidden>
+        <div><div class="muted" style="margin-bottom:6px">Pratinjau PC</div><div class="pv-d" id="pvD"></div></div>
+        <div><div class="muted" style="margin-bottom:6px">Pratinjau HP</div><div class="pv-m" id="pvM"></div></div>
+      </div>
+      <div class="row">
+        <div class="field wide"><label for="bnAlt">Judul banner (dibaca pembaca layar)</label><input id="bnAlt" type="text" placeholder="Cashback Rp100.000 setiap transaksi min 500K"></div>
+        <div class="field"><label for="bnLink">Saat banner diklik</label><select id="bnLink"></select></div>
+        <div class="field" id="bnUrlF" hidden><label for="bnUrl">Link</label><input id="bnUrl" type="url" placeholder="https://..."></div>
+        <div class="field"><label for="bnUntil">Tampil sampai (opsional)</label><input id="bnUntil" type="date"></div>
+        <button class="btn" type="button" id="bnAdd" disabled>Tambahkan ke daftar</button>
+      </div>
+    </section>
+
+    <div class="actions" style="margin-bottom:8px">
+      <button class="btn big orange" type="button" id="bnPub" disabled>Terbitkan banner</button>
+    </div>
+    <div class="status" id="bnPubStatus" hidden></div>
+  </div>
+
   <div id="panelAnalisa" role="tabpanel" aria-labelledby="tabAn" hidden>
     <div class="card setup" id="anSetup" hidden></div>
     <div class="card" id="anKeyBox" hidden>
@@ -419,7 +481,8 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-15c';
+  const ADMIN_VERSION = '2026-10-16a';
+  let curTab = 'upd';
 
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
@@ -1057,7 +1120,7 @@
     $('promoPub').hidden = !on;
     $('masterPub').hidden = !on;
     $('fotoPub').hidden = !on;
-    if($('panelAnalisa').hidden){
+    if(curTab === 'upd'){
       $('heroP').innerHTML = on
         ? 'Upload stok harian lalu klik <b>Buat &amp; terbitkan katalog</b>. Katalog langsung tersimpan ke GitHub dan halaman customer berubah sendiri dalam 1&ndash;2 menit.'
         : 'Upload stok harian, lalu unduh <b>katalog.json</b> dan upload ke repo GitHub. Halaman customer otomatis menampilkan stok terbaru. Semua proses berjalan di browser, file tidak dikirim ke server mana pun.';
@@ -1286,21 +1349,209 @@
   if(GH.token) ghConnect(true);
 
   // ===================== TAB =====================
-  function showTab(an){
-    $('tabUpd').setAttribute('aria-selected', !an);
-    $('tabAn').setAttribute('aria-selected', an);
-    $('panelUpdate').hidden = an;
-    $('panelAnalisa').hidden = !an;
-    $('heroH').textContent = an ? 'Analisa pengunjung' : 'Perbarui katalog promo';
-    $('heroP').innerHTML = an
-      ? 'Berapa customer yang membuka katalog, produk apa yang paling banyak dilihat, dan berapa kali tombol chat WhatsApp toko ditekan. Data dicatat anonim, tanpa nama atau nomor HP customer.'
-      : 'Upload stok harian, lalu unduh <b>katalog.json</b> dan upload ke repo GitHub. Halaman customer otomatis menampilkan stok terbaru. Semua proses berjalan di browser, file tidak dikirim ke server mana pun.';
-    $('heroFlow').hidden = an;
-    try{ an ? history.replaceState(null, '', '#analisa') : history.replaceState(null, '', location.pathname); }catch(e){}
-    if(an) anInit(); else ghRender();
+  function showTab(t){
+    if(t === true) t = 'an'; if(t === false) t = 'upd';
+    curTab = t;
+    $('tabUpd').setAttribute('aria-selected', t === 'upd');
+    $('tabBn').setAttribute('aria-selected', t === 'bn');
+    $('tabAn').setAttribute('aria-selected', t === 'an');
+    $('panelUpdate').hidden = t !== 'upd';
+    $('panelBanner').hidden = t !== 'bn';
+    $('panelAnalisa').hidden = t !== 'an';
+    $('heroH').textContent = t === 'an' ? 'Analisa pengunjung' : t === 'bn' ? 'Banner promo' : 'Perbarui katalog promo';
+    if(t === 'an') $('heroP').innerHTML = 'Berapa customer yang membuka katalog, produk apa yang paling banyak dilihat, dan berapa kali tombol chat WhatsApp toko ditekan. Data dicatat anonim, tanpa nama atau nomor HP customer.';
+    if(t === 'bn') $('heroP').innerHTML = 'Upload gambar campaign yang tampil di bagian atas katalog customer. Setiap ada promo baru, cukup tambahkan gambarnya di sini lalu terbitkan.';
+    $('heroFlow').hidden = t !== 'upd';
+    try{ history.replaceState(null, '', t === 'upd' ? location.pathname : '#' + (t === 'an' ? 'analisa' : 'banner')); }catch(e){}
+    if(t === 'an') anInit(); else if(t === 'bn') bnInit(); else ghRender();
   }
-  $('tabUpd').addEventListener('click', () => showTab(false));
-  $('tabAn').addEventListener('click', () => showTab(true));
+  $('tabUpd').addEventListener('click', () => showTab('upd'));
+  $('tabBn').addEventListener('click', () => showTab('bn'));
+  $('tabAn').addEventListener('click', () => showTab('an'));
+
+  // ===================== BANNER =====================
+  const BN = {items: [], pending: new Map(), removed: [], cats: [], draft: {d: null, m: null}, loaded: false};
+  const BN_MAX = 6;
+  function linkLabel(l){
+    if(!l) return 'Tanpa tautan';
+    if(l === 'promo') return 'Buka produk promo';
+    if(l === 'utama') return 'Buka koleksi utama';
+    if(l.startsWith('cat:')) return 'Buka kategori ' + l.slice(4).toLowerCase().replace('/', ' / ');
+    return 'Buka ' + l;
+  }
+  function linkOptions(sel){
+    const opts = [['', 'Tanpa tautan'], ['promo', 'Buka produk promo'], ['utama', 'Buka koleksi utama']]
+      .concat(BN.cats.map(c => ['cat:' + c, 'Buka kategori ' + c.charAt(0) + c.slice(1).toLowerCase()]))
+      .concat([['url', 'Link lain (website)…']]);
+    const isUrl = sel && /^https?:/i.test(sel);
+    return opts.map(([v, t]) => `<option value="${esc(v)}" ${(isUrl ? v === 'url' : v === (sel || '')) ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  }
+  async function bnInit(){
+    if(!BN.loaded){
+      BN.loaded = true;
+      try{ const k = await (await fetch('katalog.json?t=' + Date.now(), {cache: 'no-store'})).json(); BN.cats = [...new Set((k.items || []).map(i => String(i.l3 || '').toUpperCase()).filter(Boolean))]; }catch(e){}
+      try{
+        const r = await fetch('banner.json?t=' + Date.now(), {cache: 'no-store'});
+        if(r.ok){ const j = await r.json(); BN.items = Array.isArray(j.items) ? j.items : []; }
+      }catch(e){}
+      $('bnLink').innerHTML = linkOptions('');
+    }
+    bnRender();
+  }
+  function thumbHtml(src, cls, h){
+    return `<div class="${cls}"${h ? ` style="height:${h}px"` : ''}><div class="bg" style="background-image:url('${esc(src)}')"></div><img src="${esc(src)}" alt=""></div>`;
+  }
+  function bnRender(){
+    const st = $('bnStatus');
+    if(!ghReady()) setStatus(st, 'warn', '<span><b>Hubungkan GitHub dulu</b> (tab Update katalog, kotak paling atas) supaya gambar banner bisa diterbitkan langsung ke katalog.</span>');
+    else setStatus(st, BN.items.length ? 'ok' : '', BN.items.length ? `<span><b>${BN.items.filter(i => i.on !== false).length} banner aktif</b> dari ${BN.items.length} di daftar. Ubah urutan, tautan, atau status, lalu klik <b>Terbitkan banner</b>.</span>` : '<span>Belum ada banner. Tambahkan banner baru di bawah.</span>');
+    const today = new Date().toISOString().slice(0, 10);
+    $('bnList').innerHTML = BN.items.map((it, i) => {
+      const src = BN.pending.has(it.d) ? BN.pending.get(it.d).url : it.d;
+      const expired = it.until && it.until < today;
+      const isUrl = /^https?:/i.test(it.link || '');
+      return `<div class="bn-row${it.on === false || expired ? ' off' : ''}" data-i="${i}">
+        ${thumbHtml(src, 'bn-thumb')}
+        <div>
+          <div style="font-weight:800;margin-bottom:8px">Banner ${i + 1}${BN.pending.has(it.d) ? '<span class="bn-tag">baru, belum terbit</span>' : ''}${expired ? '<span class="bn-tag">sudah lewat tanggal</span>' : ''}${it.m ? '<span class="bn-tag" style="background:var(--teal-bg);color:var(--teal)">ada versi HP</span>' : ''}</div>
+          <div class="row">
+            <div class="field wide"><label>Judul</label><input type="text" data-f="alt" value="${esc(it.alt || '')}"></div>
+            <div class="field"><label>Saat diklik</label><select data-f="link">${linkOptions(it.link)}</select></div>
+            <div class="field" ${isUrl ? '' : 'hidden'} data-urlf><label>Link</label><input type="url" data-f="url" value="${esc(isUrl ? it.link : '')}"></div>
+            <div class="field"><label>Tampil sampai</label><input type="date" data-f="until" value="${esc(it.until || '')}"></div>
+            <label class="chk"><input type="checkbox" data-f="on" ${it.on !== false ? 'checked' : ''}> Tampilkan</label>
+          </div>
+        </div>
+        <div class="bn-ctl">
+          <button class="btn ghost" type="button" data-act="up" ${i === 0 ? 'disabled' : ''}>&uarr; Naik</button>
+          <button class="btn ghost" type="button" data-act="down" ${i === BN.items.length - 1 ? 'disabled' : ''}>&darr; Turun</button>
+          <button class="btn ghost" type="button" data-act="del" style="color:#8A2F22">Hapus</button>
+        </div>
+      </div>`;
+    }).join('');
+    $('bnPub').disabled = !ghReady();
+    $('bnAdd').disabled = !BN.draft.d || BN.items.length >= BN_MAX;
+  }
+  $('bnList').addEventListener('input', e => {
+    const row = e.target.closest('.bn-row'); if(!row) return;
+    const it = BN.items[Number(row.dataset.i)], f = e.target.dataset.f;
+    if(f === 'alt') it.alt = e.target.value.trim();
+    if(f === 'url') it.link = e.target.value.trim();
+    if(f === 'until') it.until = e.target.value || undefined;
+  });
+  $('bnList').addEventListener('change', e => {
+    const row = e.target.closest('.bn-row'); if(!row) return;
+    const it = BN.items[Number(row.dataset.i)], f = e.target.dataset.f;
+    if(f === 'link'){ const v = e.target.value; it.link = v === 'url' ? '' : v; row.querySelector('[data-urlf]').hidden = v !== 'url'; }
+    if(f === 'on'){ it.on = e.target.checked; row.classList.toggle('off', !it.on); }
+  });
+  $('bnList').addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if(!b) return;
+    const i = Number(b.closest('.bn-row').dataset.i);
+    if(b.dataset.act === 'up' && i > 0) [BN.items[i - 1], BN.items[i]] = [BN.items[i], BN.items[i - 1]];
+    if(b.dataset.act === 'down' && i < BN.items.length - 1) [BN.items[i + 1], BN.items[i]] = [BN.items[i], BN.items[i + 1]];
+    if(b.dataset.act === 'del'){
+      if(!confirm('Hapus banner ini dari daftar? Perubahan baru berlaku setelah klik Terbitkan banner.')) return;
+      const it = BN.items.splice(i, 1)[0];
+      [it.d, it.m].filter(Boolean).forEach(p => { if(BN.pending.has(p)) BN.pending.delete(p); else BN.removed.push(p); });
+    }
+    bnRender();
+  });
+
+  // gambar diperkecil di browser (tanpa memotong) lalu disimpan sebagai JPG
+  async function shrinkImage(file, maxW, maxH){
+    const bmp = await createImageBitmap(file);
+    const s = Math.min(1, maxW / bmp.width, maxH / bmp.height);
+    const w = Math.round(bmp.width * s), h = Math.round(bmp.height * s);
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.85));
+    return {blob, w, h, url: URL.createObjectURL(blob)};
+  }
+  async function onBnFile(kind, file){
+    const info = $(kind === 'd' ? 'bnInfoD' : 'bnInfoM');
+    if(!/^image\//.test(file.type)){ info.textContent = 'File harus berupa gambar (JPG/PNG).'; return; }
+    info.textContent = 'Memproses gambar…';
+    try{
+      const r = kind === 'd' ? await shrinkImage(file, 1920, 1400) : await shrinkImage(file, 1080, 1620);
+      BN.draft[kind] = r;
+      info.innerHTML = `<b>${esc(file.name)}</b>: ${r.w}&times;${r.h}px, ${(r.blob.size / 1024).toFixed(0)} KB setelah diperkecil.`;
+      if(kind === 'd' && !$('bnAlt').value) $('bnAlt').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+      bnPreview(); bnRender();
+    }catch(e){ info.textContent = 'Gambar gagal dibaca: ' + (e.message || e); }
+  }
+  function bnPreview(){
+    const d = BN.draft.d; if(!d){ $('bnPrev').hidden = true; return; }
+    $('bnPrev').hidden = false;
+    const wd = $('pvD').clientWidth || 600;
+    // aturan sama dengan halaman customer: PC maks 420px dari lebar 1232px
+    const hd = Math.round(Math.min(wd * d.h / d.w, 420 * wd / 1232));
+    $('pvD').outerHTML = thumbHtml(d.url, 'pv-d', hd).replace('class="pv-d"', 'class="pv-d" id="pvD"');
+    const m = BN.draft.m || d;
+    $('pvM').outerHTML = thumbHtml(m.url, 'pv-m', Math.round(200 * m.h / m.w)).replace('class="pv-m"', 'class="pv-m" id="pvM"');
+  }
+  wireDrop('bnDropD', 'bnFileD', f => onBnFile('d', f));
+  wireDrop('bnDropM', 'bnFileM', f => onBnFile('m', f));
+  $('bnLink').addEventListener('change', e => { $('bnUrlF').hidden = e.target.value !== 'url'; });
+  $('bnAdd').addEventListener('click', () => {
+    const d = BN.draft.d; if(!d) return;
+    const id = 'b' + Date.now().toString(36);
+    const it = {id, d: `banner/${id}-d.jpg`, w: d.w, h: d.h, alt: $('bnAlt').value.trim(), on: true};
+    BN.pending.set(it.d, d);
+    if(BN.draft.m){ it.m = `banner/${id}-m.jpg`; it.mw = BN.draft.m.w; it.mh = BN.draft.m.h; BN.pending.set(it.m, BN.draft.m); }
+    const lv = $('bnLink').value; it.link = lv === 'url' ? $('bnUrl').value.trim() : lv;
+    if($('bnUntil').value) it.until = $('bnUntil').value;
+    BN.items.unshift(it);
+    BN.draft = {d: null, m: null};
+    ['bnAlt', 'bnUrl', 'bnUntil'].forEach(id => $(id).value = '');
+    $('bnLink').value = ''; $('bnUrlF').hidden = true;
+    $('bnInfoD').textContent = 'Dipakai di PC, dan juga di HP bila gambar HP tidak diisi.';
+    $('bnInfoM').textContent = 'Disarankan persegi atau tegak, supaya teks terbaca jelas di HP.';
+    $('bnPrev').hidden = true;
+    bnRender();
+    setStatus($('bnPubStatus'), 'warn', '<span><b>Banner ditambahkan ke daftar.</b> Klik <b>Terbitkan banner</b> supaya tampil di halaman customer.</span>');
+  });
+
+  function blobToB64(blob){
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+  }
+  async function ghPutB64(path, content, message){
+    let sha;
+    try{ const f = await ghFetch(`/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${encodeURIComponent(GH.branch)}`, {headers: {'Accept': 'application/vnd.github.object'}}); sha = f && f.sha; }catch(e){ if(e.status !== 404) throw e; }
+    return ghFetch(`/repos/${GH.owner}/${GH.repo}/contents/${path}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message, content, branch: GH.branch, sha})});
+  }
+  async function ghDelete(path, message){
+    try{
+      const f = await ghFetch(`/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${encodeURIComponent(GH.branch)}`, {headers: {'Accept': 'application/vnd.github.object'}});
+      await ghFetch(`/repos/${GH.owner}/${GH.repo}/contents/${path}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message, sha: f.sha, branch: GH.branch})});
+    }catch(e){ if(e.status !== 404) throw e; }
+  }
+  $('bnPub').addEventListener('click', async () => {
+    const st = $('bnPubStatus');
+    const bad = BN.items.find(it => /^https?:/i.test(it.link || '') === false && it.link && !['promo', 'utama'].includes(it.link) && !it.link.startsWith('cat:'));
+    if(bad){ setStatus(st, 'err', '<b>Ada link yang belum valid.</b> Isi link lengkap yang diawali https://'); return; }
+    $('bnPub').disabled = true;
+    try{
+      const pend = [...BN.pending.entries()].filter(([p]) => BN.items.some(it => it.d === p || it.m === p));
+      let k = 0;
+      for(const [path, img] of pend){
+        k++; setStatus(st, '', `Mengupload gambar ${k} dari ${pend.length}&hellip;`);
+        await ghPutB64(path, await blobToB64(img.blob), 'Tambah banner via admin');
+      }
+      setStatus(st, '', 'Menyimpan banner.json&hellip;');
+      const out = {v: 1, updated: new Date().toISOString(), items: BN.items.map(it => { const o = Object.assign({}, it); if(!o.until) delete o.until; return o; })};
+      await ghPutB64('banner.json', b64(JSON.stringify(out)), 'Update banner via admin');
+      BN.pending.clear();
+      const rm = BN.removed.splice(0);
+      for(const p of rm){ setStatus(st, '', 'Menghapus gambar lama&hellip;'); await ghDelete(p, 'Hapus banner via admin'); }
+      setStatus(st, 'ok', `<span><b>Banner terbit.</b> Halaman customer berubah dalam 1&ndash;2 menit. <a href="index.html" target="_blank" rel="noopener">Buka katalog</a></span>`);
+    }catch(e){
+      setStatus(st, 'err', '<b>Gagal menerbitkan banner.</b> ' + esc(ghErrText(e)));
+    }
+    bnRender();
+  });
 
   // ===================== ANALISA =====================
   const AN = {url: '', key: '', stores: [], rows: [], from: '', to: '', range: '7', store: '', loaded: false};
@@ -1604,7 +1855,8 @@
   $('anStore').addEventListener('change', e => { AN.store = e.target.value; if(AN.loaded) anRender(); });
   $('anReload').addEventListener('click', anLoad);
   $('anExport').addEventListener('click', anExport);
-  if(location.hash === '#analisa') showTab(true);
+  if(location.hash === '#analisa') showTab('an');
+  else if(location.hash === '#banner') showTab('bn');
 })();
 </script>
 </body>
