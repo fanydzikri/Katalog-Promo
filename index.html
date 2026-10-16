@@ -38,6 +38,22 @@
   .store-chip svg{flex:none;}
   .store-chip.set{background:var(--orange-tint);color:var(--orange-deep);}
   .store-chip:hover{background:var(--navy);color:#fff;}
+  .store-chip.set{border-radius:999px 0 0 999px;padding-right:10px;}
+  .store-x{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:-16px;height:32px;width:30px;border:none;border-left:1px solid #F3C7B4;border-radius:0 999px 999px 0;background:var(--orange-tint);color:var(--orange-deep);font-size:18px;font-weight:700;line-height:1;cursor:pointer;padding:0 2px 2px 0;}
+  .store-x[hidden]{display:none;}
+  .store-x:hover{background:var(--orange);color:#fff;}
+  .store-x:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .sel-wrap{position:relative;}
+  .sel-wrap select{padding-right:84px;}
+  .sel-x{position:absolute;right:38px;top:50%;transform:translateY(-50%);height:30px;padding:0 10px 2px;border:none;border-radius:999px;background:var(--orange-tint);color:var(--orange-deep);font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+  .sel-x[hidden]{display:none;}
+  .sel-x:hover{background:var(--orange);color:#fff;}
+  .sel-x:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .store-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--orange);background:var(--orange-tint);color:var(--orange-deep);border-radius:999px;padding:2px 6px 2px 10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;vertical-align:baseline;}
+  .store-pill b{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;line-height:1;padding-bottom:1px;}
+  .store-pill:hover{background:var(--orange);color:#fff;}
+  .store-pill:hover b{background:#fff;color:var(--orange-deep);}
+  .store-pill:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
   .store-chip:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
 
   /* ---------- Banner campaign (diupload admin) ---------- */
@@ -266,6 +282,15 @@
   .state{text-align:center;padding:56px 20px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--line);border-radius:12px;}
   .state .big{font-size:17px;color:var(--navy);font-weight:800;margin-bottom:6px;}
   .state p{margin:0 auto 14px;max-width:440px;}
+  .rec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px 6px;}
+  .rec-h{font-size:17px;font-weight:800;color:var(--navy-ink);margin-bottom:10px;}
+  .rec-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .rec-btn{border:none;background:var(--navy);color:#fff;font-weight:700;font-size:13.5px;border-radius:999px;padding:9px 16px;cursor:pointer;font-family:inherit;}
+  .rec-btn:hover{background:var(--navy-deep);}
+  .rec-btn:first-child{background:var(--orange);}
+  .rec-btn:first-child:hover{background:var(--orange-deep);}
+  .rec-btn:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .rec-sub{font-size:13px;color:var(--ink-soft);font-weight:600;margin-bottom:10px;}
   .af{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:0 auto 16px;max-width:620px;font-size:13px;}
   .af > span{color:var(--ink-soft);font-weight:600;}
   .af-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--orange);background:var(--orange-tint);color:var(--orange-deep);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
@@ -463,6 +488,8 @@
     .brandbar img{height:24px;}
     .brandbar .sep,.brandbar .app{display:none;}
     .store-chip{max-width:44vw;padding:7px 12px;font-size:12.5px;}
+    .store-chip.set{max-width:38vw;}
+    .store-x{height:31px;margin-left:-12px;}
     .cart-btn{padding:7px 11px;}
     .cart-btn .cb-l{display:none;}
     .pd-cta{gap:6px;}
@@ -601,6 +628,7 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M4 10v10h16V10"/><path d="M9 20v-6h6v6"/></svg>
       <span id="storeChipTxt">Semua toko</span>
     </button>
+    <button type="button" class="store-x" id="storeX" aria-label="Hapus pilihan toko, tampilkan semua toko" title="Tampilkan semua toko" hidden>&times;</button>
     <button type="button" class="cart-btn" id="cartBtn" aria-label="Buka keranjang">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h15l-1.5 8.5a2 2 0 0 1-2 1.5H9.2a2 2 0 0 1-2-1.6L5 3H2"/><circle cx="9.5" cy="20.5" r="1.3"/><circle cx="17.5" cy="20.5" r="1.3"/></svg>
       <span class="cb-l">Keranjang</span><span class="n" id="cartCount"></span>
@@ -628,7 +656,10 @@
       <h2>Mau belanja di toko mana?</h2>
       <p>Katalog langsung menyesuaikan dengan stok di toko pilihanmu.</p>
       <label for="storeSel" class="fb-label" style="display:block;margin-bottom:6px">Toko</label>
-      <select id="storeSel"><option value="-1">Semua toko</option></select>
+      <div class="sel-wrap">
+        <select id="storeSel"><option value="-1">Semua toko</option></select>
+        <button type="button" class="sel-x" id="pickerX" aria-label="Hapus pilihan toko, tampilkan semua toko" title="Tampilkan semua toko" hidden><span aria-hidden="true">&times;</span> Hapus</button>
+      </div>
       <div class="links">
       <a class="wa-btn" id="pickerWa" data-tr="wa" data-src="pilih-toko" href="#" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg> Chat WhatsApp toko</a>
       <a class="maps" id="pickerMaps" data-tr="maps" data-src="pilih-toko" href="#" target="_blank" rel="noopener">
@@ -970,6 +1001,64 @@
     return true;
   }
 
+  // Hitung daftar produk dengan filter sementara diubah (untuk rekomendasi saat hasil kosong)
+  function withState(mod, fn){
+    const keep = {disc: S.disc, size: S.size, gender: S.gender, sub: S.sub, cat: S.cat, store: S.store};
+    Object.assign(S, mod);
+    try{ return fn(); } finally { Object.assign(S, keep); }
+  }
+  function currentList(){
+    const out = [];
+    P.forEach(p => { const v = view(p); if(v && matches(p, v)) out.push({p, v}); });
+    return out.sort(sorter);
+  }
+  // Cari alternatif terdekat: longgarkan satu filter per langkah, urut dari yang paling mungkin membuat kosong
+  function suggestions(){
+    const sg = [];
+    const storeName = S.store >= 0 ? D.stores[S.store].name : '';
+    if(S.disc){
+      const res = withState({disc: 0}, () => currentList());
+      if(res.length){
+        // kelompokkan per besaran diskon yang benar-benar ada
+        const byD = new Map();
+        res.forEach(x => { new Set(x.v.cols.map(c => c.d)).forEach(d => byD.set(d, (byD.get(d) || 0) + 1)); });
+        const opts = [...byD.entries()].filter(([d]) => d !== S.disc).sort((a, b) => b[0] - a[0]);
+        sg.push({key: 'disc', title: S.disc === -2 ? 'Ada dalam harga promo' : 'Ada dengan diskon lain', list: res, mod: {disc: 0},
+          btns: opts.map(([d, n]) => ({label: d === 0 ? `Koleksi Utama · ${n} produk` : `Diskon ${d}% · ${n} produk`, act: 'disc:' + (d === 0 ? -2 : d)}))});
+      }
+    }
+    if(S.size.size){
+      const res = withState({size: new Set()}, () => currentList());
+      if(res.length) sg.push({key: 'size', title: 'Ada di ukuran lain', list: res, mod: {size: new Set()}, btns: [{label: `Semua ukuran · ${res.length} produk`, act: 'clear:size'}]});
+    }
+    if(S.gender.size){
+      const res = withState({gender: new Set()}, () => currentList());
+      if(res.length) sg.push({key: 'gender', title: 'Ada untuk pilihan lain', list: res, mod: {gender: new Set()}, btns: [{label: `Untuk semua · ${res.length} produk`, act: 'clear:gender'}]});
+    }
+    if(S.sub){
+      const res = withState({sub: ''}, () => currentList());
+      if(res.length) sg.push({key: 'sub', title: `Ada di sub-kategori ${CATL(S.cat)} lainnya`, list: res, mod: {sub: ''}, btns: [{label: `Semua ${CATL(S.cat)} · ${res.length} produk`, act: 'clear:sub'}]});
+    }
+    if(S.cat !== 'ALL' && S.q){
+      const res = withState({cat: 'ALL', sub: ''}, () => currentList());
+      if(res.length) sg.push({key: 'cat', title: 'Ada di kategori lain', list: res, mod: {cat: 'ALL', sub: ''}, btns: [{label: `Semua kategori · ${res.length} produk`, act: 'clear:cat'}]});
+    }
+    if(S.store >= 0){
+      const res = withState({store: -1}, () => currentList());
+      if(res.length){
+        const stores = new Set(); res.forEach(x => x.p.byStore.forEach((e, si) => { if(si !== S.store) stores.add(si); }));
+        sg.push({key: 'store', title: `Tidak ada di ${storeName}, tapi ada di toko lain`, list: res, mod: {store: -1}, btns: [{label: `Lihat di ${stores.size} toko lain · ${res.length} produk`, act: 'store'}]});
+      }
+    }
+    // gabungan: lepas semua filter kecuali kata kunci & toko
+    if(!sg.length && (S.disc || S.size.size || S.gender.size || S.sub || S.cat !== 'ALL')){
+      const mod = {disc: 0, size: new Set(), gender: new Set(), sub: '', cat: 'ALL'};
+      const res = withState(mod, () => currentList());
+      if(res.length) sg.push({key: 'all', title: 'Ada bila filter dilepas', list: res, mod, btns: [{label: `Lepas semua filter · ${res.length} produk`, act: 'reset'}]});
+    }
+    return sg;
+  }
+
   function sorter(a, b){
     const va = a.v, vb = b.v;
     switch(S.sort){
@@ -1004,7 +1093,7 @@
 
     const list = base.filter(x => matches(x.p, x.v)).sort(sorter);
     lastCount = list.length;
-    const where = S.store >= 0 ? ' di toko <strong>' + esc(storeLabel(S.store)) + '</strong>' : ' di semua toko';
+    const where = S.store >= 0 ? ` di toko <button type="button" class="store-pill" data-act="clearstore" aria-label="Hapus pilihan toko ${esc(storeLabel(S.store))}, tampilkan semua toko">${esc(storeLabel(S.store))} <b aria-hidden="true">&times;</b></button>` : ' di semua toko';
     $('resultTxt').innerHTML = `<strong>${list.length.toLocaleString('id-ID')}</strong> produk${where}`;
     $('resetBtn').hidden = !(S.q || S.gender.size || S.size.size || S.disc || S.cat !== 'ALL' || S.sub);
     const nf = S.gender.size + S.size.size + (S.disc ? 1 : 0) + (S.sort !== 'disc' ? 1 : 0);
@@ -1021,8 +1110,18 @@
       if(S.disc) chips.push(['disc', 'Harga: ' + (S.disc === -2 ? 'Koleksi Utama' : S.disc === -1 ? 'Promo' : S.disc + '%')]);
       if(S.sub) chips.push(['sub', 'Sub-kategori: ' + titleCase(S.sub)]);
       const chipHtml = chips.length ? `<div class="af"><span>Filter aktif:</span>${chips.map(([k, t]) => `<button type="button" class="af-chip" data-clear="${k}" aria-label="Lepas ${esc(t)}">${esc(t)} <b aria-hidden="true">&times;</b></button>`).join('')}</div>` : '';
-      grid.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="big">Produk tidak ditemukan</div><p>${S.store >= 0 ? 'Coba lepas salah satu filter di bawah, atau lihat produk di semua toko.' : 'Coba lepas salah satu filter di bawah, atau cari dengan kata lain.'}</p>${chipHtml}<button type="button" class="btn ghost" data-act="reset">Hapus semua filter</button>${S.store >= 0 ? ' <button type="button" class="btn ghost" data-act="allstores">Lihat semua toko</button>' : ''}</div>`;
+      const sg = suggestions();
+      let recHtml = '';
+      if(sg.length){
+        const top = sg[0];
+        const cards = withState(top.mod, () => top.list.slice(0, 8).map(cardHtml).join(''));
+        const btns = sg.flatMap(s => s.btns).slice(0, 8);
+        recHtml = `<div class="rec" style="grid-column:1/-1"><div class="rec-h">Mungkin ini yang kamu cari</div><div class="rec-btns">${btns.map(b => `<button type="button" class="rec-btn" data-rec="${esc(b.act)}">${esc(b.label)} <span aria-hidden="true">&rarr;</span></button>`).join('')}</div><div class="rec-sub">${esc(top.title)}${top.list.length > 8 ? ` · menampilkan 8 dari ${top.list.length.toLocaleString('id-ID')}` : ''}</div></div>` + cards;
+      }
+      grid.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="big">Produk tidak ditemukan</div><p>${S.store >= 0 ? 'Coba lepas salah satu filter di bawah, atau lihat produk di semua toko.' : 'Coba lepas salah satu filter di bawah, atau cari dengan kata lain.'}</p>${chipHtml}<button type="button" class="btn ghost" data-act="reset">Hapus semua filter</button>${S.store >= 0 ? ' <button type="button" class="btn ghost" data-act="allstores">Lihat semua toko</button>' : ''}</div>` + recHtml;
       $('moreWrap').hidden = true;
+      const recKey = S.q + '|' + (sg[0] ? sg[0].key : '');
+      if(sg.length && S.q && recKey !== render._rec){ render._rec = recKey; track('search', Object.assign({q: S.q + ' (rekomendasi: ' + sg[0].key + ')', r: 0, src: 'kosong'}, storeInfo(S.store))); }
       return;
     }
     grid.innerHTML = list.slice(0, S.shown).map(cardHtml).join('');
@@ -1796,6 +1895,8 @@
     const has = si >= 0;
     $('storeChipTxt').textContent = has ? storeLabel(si) : 'Semua toko';
     $('storeChip').classList.toggle('set', has);
+    $('storeX').hidden = !has;
+    $('pickerX').hidden = !has;
     const m = $('pickerMaps');
     m.classList.toggle('show', has);
     if(has){ m.href = mapsUrl(si); m.dataset.si = si; $('pickerWa').dataset.si = si; }
@@ -1819,6 +1920,15 @@
   }
 
   // ---------- events ----------
+  // tombol x: kembali ke semua toko tanpa membuka dropdown
+  function clearStore(){
+    const name = S.store >= 0 ? D.stores[S.store].name : '';
+    setStore(-1, false); cartStore = -1;
+    toast(name ? `Menampilkan semua toko (sebelumnya ${name})` : 'Menampilkan semua toko');
+  }
+  $('storeX').addEventListener('click', clearStore);
+  $('pickerX').addEventListener('click', clearStore);
+  $('resultTxt').addEventListener('click', e => { if(e.target.closest('[data-act="clearstore"]')) clearStore(); });
   $('storeSel').addEventListener('change', e => { setStore(Number(e.target.value), true); cartStore = S.store; if(S.store >= 0) track('store', storeInfo(S.store)); });
   $('storeChip').addEventListener('click', () => {
     $('picker').scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -1888,6 +1998,23 @@
   $('grid').addEventListener('click', e => {
     const a = e.target.closest('[data-act]');
     if(a){ if(a.dataset.act === 'reset') resetFilters(); else setStore(-1, false); return; }
+    const rb = e.target.closest('[data-rec]');
+    if(rb){
+      const act = rb.dataset.rec;
+      if(act.startsWith('disc:')){ setDisc(Number(act.slice(5))); }
+      else if(act === 'store'){ setStore(-1, false); }
+      else if(act === 'reset'){ const q = S.q; resetFilters(); if(q){ S.q = q; $('q').value = q; render(); } }
+      else if(act.startsWith('clear:')){
+        const k = act.slice(6);
+        if(k === 'size') S.size.clear();
+        if(k === 'gender') S.gender.clear();
+        if(k === 'sub') S.sub = '';
+        if(k === 'cat'){ S.cat = 'ALL'; S.sub = ''; }
+        S.shown = PAGE; render();
+      }
+      $('controls').scrollIntoView({block: 'start'});
+      return;
+    }
     const cl = e.target.closest('[data-clear]');
     if(cl){
       const k = cl.dataset.clear;
