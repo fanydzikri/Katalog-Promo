@@ -266,6 +266,12 @@
   .state{text-align:center;padding:56px 20px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--line);border-radius:12px;}
   .state .big{font-size:17px;color:var(--navy);font-weight:800;margin-bottom:6px;}
   .state p{margin:0 auto 14px;max-width:440px;}
+  .af{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:0 auto 16px;max-width:620px;font-size:13px;}
+  .af > span{color:var(--ink-soft);font-weight:600;}
+  .af-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--orange);background:var(--orange-tint);color:var(--orange-deep);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .af-chip b{font-size:15px;line-height:1;}
+  .af-chip:hover{background:var(--orange);color:#fff;}
+  .af-chip:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
   .skel{background:linear-gradient(90deg,#EEF1F7 25%,#F7F9FC 50%,#EEF1F7 75%);background-size:200% 100%;animation:sh 1.2s infinite linear;border-radius:12px;aspect-ratio:3/4.4;}
   @keyframes sh{to{background-position:-200% 0;}}
 
@@ -956,8 +962,11 @@
     if(skip !== 'cat' && S.cat !== 'ALL' && p.cat !== S.cat) return false;
     if(skip !== 'cat' && skip !== 'sub' && S.sub && p.l4 !== S.sub) return false;
     if(S.q){ const words = S.q.split(/\s+/).filter(Boolean); if(!words.every(w => p.search.includes(w))) return false; }
-    if(skip !== 'gender' && S.gender.size && !S.gender.has(p.gender)) return false;
-    if(skip !== 'size' && S.size.size && ![...S.size].some(s => v.sizes.has(s))) return false;
+    // daftar kategori & sub-kategori (tab, tombol sub, dropdown) tidak ikut disaring Untuk/Ukuran,
+    // supaya kategori lain tetap terlihat walau ukuran yang dipilih tidak ada di sana
+    const nav = skip === 'cat' || skip === 'sub';
+    if(!nav && skip !== 'gender' && S.gender.size && !S.gender.has(p.gender)) return false;
+    if(!nav && skip !== 'size' && S.size.size && ![...S.size].some(s => v.sizes.has(s))) return false;
     return true;
   }
 
@@ -1005,7 +1014,14 @@
 
     const grid = $('grid');
     if(!list.length){
-      grid.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="big">Produk tidak ditemukan</div><p>${S.store >= 0 ? 'Coba hapus beberapa filter, atau lihat produk di semua toko.' : 'Coba kata kunci lain atau hapus beberapa filter.'}</p><button type="button" class="btn ghost" data-act="reset">Hapus semua filter</button>${S.store >= 0 ? ' <button type="button" class="btn ghost" data-act="allstores">Lihat semua toko</button>' : ''}</div>`;
+      const chips = [];
+      if(S.q) chips.push(['q', 'Cari: ' + S.q]);
+      if(S.gender.size) chips.push(['gender', 'Untuk: ' + [...S.gender].join(', ')]);
+      if(S.size.size) chips.push(['size', 'Ukuran: ' + [...S.size].sort(sizeCmp).map(sizeLabel).join(', ')]);
+      if(S.disc) chips.push(['disc', 'Harga: ' + (S.disc === -2 ? 'Koleksi Utama' : S.disc === -1 ? 'Promo' : S.disc + '%')]);
+      if(S.sub) chips.push(['sub', 'Sub-kategori: ' + titleCase(S.sub)]);
+      const chipHtml = chips.length ? `<div class="af"><span>Filter aktif:</span>${chips.map(([k, t]) => `<button type="button" class="af-chip" data-clear="${k}" aria-label="Lepas ${esc(t)}">${esc(t)} <b aria-hidden="true">&times;</b></button>`).join('')}</div>` : '';
+      grid.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="big">Produk tidak ditemukan</div><p>${S.store >= 0 ? 'Coba lepas salah satu filter di bawah, atau lihat produk di semua toko.' : 'Coba lepas salah satu filter di bawah, atau cari dengan kata lain.'}</p>${chipHtml}<button type="button" class="btn ghost" data-act="reset">Hapus semua filter</button>${S.store >= 0 ? ' <button type="button" class="btn ghost" data-act="allstores">Lihat semua toko</button>' : ''}</div>`;
       $('moreWrap').hidden = true;
       return;
     }
@@ -1688,7 +1704,7 @@
     const cat = b.dataset.mcat, sub = b.dataset.msub;
     hideMenu(true);
     if(!S.browse) enterBrowse({cat, sub});
-    else { S.cat = cat; S.sub = sub; S.shown = PAGE; render(); }
+    else changeCat(cat, sub);
     track('search', {q: 'kategori: ' + CATL(cat).toLowerCase() + (sub ? ' / ' + titleCase(sub).toLowerCase() : ''), r: lastCount, src: 'menu'});
   });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !menu.hidden) hideMenu(true); });
@@ -1808,10 +1824,36 @@
     $('picker').scrollIntoView({behavior: 'smooth', block: 'center'});
     setTimeout(() => $('storeSel').focus({preventScroll: true}), 350);
   });
-  $('tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if(!t) return; hideMenu(true); S.cat = t.dataset.cat; S.sub = ''; S.shown = PAGE; render(); });
+  // Pindah kategori: filter Untuk & Ukuran direset supaya pilihan dari kategori lama (mis. ukuran 42 sepatu)
+  // tidak terbawa dan membuat hasil kosong. Pindah sub-kategori: hanya ukuran yang tidak tersedia yang dilepas.
+  function sizesFor(cat, sub){
+    const set = new Set();
+    P.forEach(p => {
+      if((cat !== 'ALL' && p.cat !== cat) || (sub && p.l4 !== sub)) return;
+      const v = view(p); if(!v) return;
+      v.sizes.forEach(s => set.add(s));
+    });
+    return set;
+  }
+  function changeCat(cat, sub){
+    const catChanged = cat !== S.cat;
+    const cleared = [];
+    if(catChanged){
+      if(S.gender.size){ S.gender.clear(); cleared.push('Untuk'); }
+      if(S.size.size){ S.size.clear(); cleared.push('Ukuran'); }
+    }else if(S.size.size && sub !== S.sub){
+      const ok = sizesFor(cat, sub);
+      const drop = [...S.size].filter(s => !ok.has(s));
+      if(drop.length){ drop.forEach(s => S.size.delete(s)); cleared.push('Ukuran ' + drop.map(sizeLabel).join(', ')); }
+    }
+    S.cat = cat; S.sub = sub || ''; S.shown = PAGE;
+    render();
+    if(cleared.length) toast(`Filter ${cleared.join(' & ')} direset untuk kategori ini`);
+  }
+  $('tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if(!t) return; hideMenu(true); changeCat(t.dataset.cat, ''); });
   $('subs').addEventListener('click', e => {
     const b = e.target.closest('.sub'); if(!b) return;
-    S.sub = b.dataset.sub; S.shown = PAGE; render();
+    changeCat(S.cat, b.dataset.sub);
     if(S.sub) track('search', {q: 'kategori: ' + CATL(S.cat).toLowerCase() + ' / ' + titleCase(S.sub).toLowerCase(), r: lastCount, src: 'menu'});
   });
   let qT = null, sT = null, lastQ = '', lastCount = 0;
@@ -1846,6 +1888,16 @@
   $('grid').addEventListener('click', e => {
     const a = e.target.closest('[data-act]');
     if(a){ if(a.dataset.act === 'reset') resetFilters(); else setStore(-1, false); return; }
+    const cl = e.target.closest('[data-clear]');
+    if(cl){
+      const k = cl.dataset.clear;
+      if(k === 'q'){ S.q = ''; $('q').value = ''; }
+      if(k === 'gender') S.gender.clear();
+      if(k === 'size') S.size.clear();
+      if(k === 'sub') S.sub = '';
+      if(k === 'disc'){ setDisc(0); return; }
+      S.shown = PAGE; render(); return;
+    }
     const card = e.target.closest('.card');
     if(card) openProduct(Number(card.dataset.i));
   });
