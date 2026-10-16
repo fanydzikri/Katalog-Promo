@@ -40,6 +40,26 @@
   .store-chip:hover{background:var(--navy);color:#fff;}
   .store-chip:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
 
+  /* ---------- Banner campaign (diupload admin) ---------- */
+  .campaign{background:var(--navy);padding:16px 0 0;}
+  .campaign[hidden]{display:none;}
+  .cb{position:relative;border-radius:16px;overflow:hidden;background:#0A1640;box-shadow:0 14px 36px rgba(5,14,45,.35);}
+  .cb-slide{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;visibility:hidden;}
+  .cb-slide.on{opacity:1;visibility:visible;}
+  .cb-slide .bg{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(24px) brightness(.7);transform:scale(1.1);}
+  .cb-slide picture,.cb-slide img{position:relative;display:block;width:100%;height:100%;}
+  .cb-slide img{object-fit:contain;}
+  .cb-slide a,.cb-slide button.cb-hit{position:absolute;inset:0;z-index:2;border:none;background:none;padding:0;cursor:pointer;}
+  .cb-slide a:focus-visible,.cb-slide button.cb-hit:focus-visible{outline:3px solid var(--orange);outline-offset:-3px;border-radius:16px;}
+  .cb-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.9);color:var(--navy);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 3px;}
+  .cb-nav:hover{background:#fff;}
+  .cb-nav:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .cb-nav.prev{left:12px;} .cb-nav.next{right:12px;}
+  .cb-dots{position:absolute;left:0;right:0;bottom:10px;z-index:3;display:flex;justify-content:center;gap:6px;}
+  .cb-dots button{width:8px;height:8px;border-radius:999px;border:none;background:rgba(255,255,255,.55);padding:0;cursor:pointer;transition:width .2s ease;}
+  .cb-dots button[aria-current="true"]{width:22px;background:#fff;}
+  .cb-dots button:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+
   /* ---------- Hero ---------- */
   .hero{background:var(--navy);color:#fff;position:relative;overflow:hidden;}
   .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--orange);}
@@ -162,12 +182,13 @@
   .tab[aria-selected="true"] .tab-badge{background:var(--orange);color:#fff;}
 
   /* ---------- Filter bar ---------- */
-  .filter-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+  .filter-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
   .fb-field{display:flex;flex-direction:column;gap:5px;}
   .fb-more{display:contents;}
-  .fb-sort{order:4;}
-  .fb-price{order:5;flex-basis:100%;}
-  .fb-price .seg{align-self:flex-start;}
+  .fb-sort{order:5;}
+  .fb-price{order:4;}
+  .fb-search{flex:1 1 150px;min-width:150px;}
+  .fb-search .search-input{width:100%;}
   .fb-toggle,.sheet-head,.sheet-foot,.sheet-bd{display:none;}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
   html.lock,html.lock body{overflow:hidden;}
@@ -176,12 +197,12 @@
   .search-input:focus,.sel:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-tint);}
   .sel{border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;font-size:13.5px;background:#fff;color:var(--ink);cursor:pointer;}
   .seg{display:inline-flex;background:var(--navy-tint);border-radius:8px;padding:3px;}
-  .seg button{border:none;background:none;font-weight:700;font-size:13px;color:var(--navy);padding:6px 8px;border-radius:6px;cursor:pointer;white-space:nowrap;}
+  .seg button{border:none;background:none;font-weight:700;font-size:12.5px;color:var(--navy);padding:6px 7px;border-radius:6px;cursor:pointer;white-space:nowrap;}
   .seg button[aria-pressed="true"]{background:var(--navy);color:#fff;}
   .seg button:focus-visible{outline:3px solid var(--orange);outline-offset:1px;}
 
   .ms{position:relative;}
-  .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;font-size:13.5px;background:#fff;color:var(--ink);width:140px;cursor:pointer;text-align:left;}
+  .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;font-size:13.5px;background:#fff;color:var(--ink);width:118px;cursor:pointer;text-align:left;}
   .ms-btn:hover{border-color:var(--navy);}
   .ms-btn .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ms-btn .chev{font-size:10px;color:var(--ink-soft);}
@@ -550,6 +571,14 @@
     .price b{font-size:14px;}
     .fb-toggle .lbl-t{display:none;}
   }
+  @media (max-width:640px){
+    .campaign{padding-top:10px;}
+    .campaign .wrap{padding:0 10px;}
+    .cb{border-radius:12px;}
+    .cb-nav{display:none;}
+    .cb-dots{bottom:6px;}
+  }
+  @media (prefers-reduced-motion:reduce){ .cb-slide{transition:none;} }
   @media (prefers-reduced-motion:reduce){ .skel{animation:none;} *{scroll-behavior:auto !important;} }
 </style>
 </head>
@@ -572,6 +601,10 @@
     </button>
   </div>
 </header>
+
+<section class="campaign" id="campaign" aria-label="Promo" hidden>
+  <div class="wrap"><div class="cb" id="cb"></div></div>
+</section>
 
 <section class="hero">
   <div class="wrap">
@@ -1661,6 +1694,83 @@
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !menu.hidden) hideMenu(true); });
   window.addEventListener('scroll', () => { if(!menu.hidden) placeMenu(); }, {passive: true});
   window.addEventListener('resize', () => hideMenu(true));
+
+  // ---------- banner campaign (banner.json diterbitkan dari admin) ----------
+  const CB = {items: [], i: 0, timer: null, paused: false};
+  function bannerHeight(it){
+    const w = window.innerWidth, mob = w <= 640;
+    const box = $('cb').clientWidth || Math.min(w, 1280);
+    const rw = mob && it.m ? (it.mw || it.w) : it.w, rh = mob && it.m ? (it.mh || it.h) : it.h;
+    const natural = box * (rh / rw);
+    // PC: tinggi dibatasi, sisa ruang diisi gambar buram; HP: tampil utuh selebar layar
+    return Math.round(mob ? Math.min(natural, window.innerHeight * 0.7) : Math.min(natural, 420, window.innerHeight * 0.55));
+  }
+  function sizeBanner(){
+    if(!CB.items.length) return;
+    $('cb').style.height = Math.max(...CB.items.map(bannerHeight)) + 'px';
+  }
+  function bannerGo(i){
+    const n = CB.items.length; if(!n) return;
+    CB.i = (i + n) % n;
+    $('cb').querySelectorAll('.cb-slide').forEach((s, k) => { s.classList.toggle('on', k === CB.i); s.setAttribute('aria-hidden', k !== CB.i); s.querySelectorAll('a,button').forEach(x => x.tabIndex = k === CB.i ? 0 : -1); });
+    $('cb').querySelectorAll('.cb-dots button').forEach((d, k) => d.setAttribute('aria-current', k === CB.i));
+  }
+  function bannerAuto(){
+    clearInterval(CB.timer);
+    if(CB.items.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    CB.timer = setInterval(() => { if(!CB.paused && !document.hidden) bannerGo(CB.i + 1); }, 6000);
+  }
+  function bannerAction(it){
+    track('search', {q: 'banner: ' + (it.alt || it.id), r: 0, src: 'banner'});
+    const l = it.link || '';
+    if(l === 'promo') enterBrowse({disc: -1});
+    else if(l === 'utama') enterBrowse({disc: -2});
+    else if(l.startsWith('cat:')){ const [c, s] = l.slice(4).split('/'); enterBrowse({cat: c, sub: s || ''}); }
+  }
+  async function loadBanners(){
+    let j = null;
+    try{
+      const res = await fetch('banner.json?t=' + Math.floor(Date.now() / 60000), {cache: 'no-cache'});
+      if(res.ok) j = await res.json();
+    }catch(e){}
+    const now = new Date().toISOString().slice(0, 10);
+    CB.items = (j && Array.isArray(j.items) ? j.items : []).filter(it => it && it.on !== false && it.d && (!it.until || it.until >= now));
+    if(!CB.items.length){ $('campaign').hidden = true; return; }
+    const ext = l => /^https?:\/\//i.test(l || '');
+    $('cb').innerHTML = CB.items.map((it, k) => {
+      const img = `<picture>${it.m ? `<source media="(max-width:640px)" srcset="${esc(it.m)}">` : ''}<img src="${esc(it.d)}" alt="${esc(it.alt || 'Promo')}" ${k ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async"></picture>`;
+      const hit = !it.link ? '' : ext(it.link)
+        ? `<a href="${esc(it.link)}" target="_blank" rel="noopener" aria-label="${esc(it.alt || 'Lihat promo')}"></a>`
+        : `<button type="button" class="cb-hit" data-cb="${k}" aria-label="${esc(it.alt || 'Lihat promo')}"></button>`;
+      return `<div class="cb-slide${k ? '' : ' on'}" role="group" aria-roledescription="slide" aria-label="${k + 1} dari ${CB.items.length}"><div class="bg" style="background-image:url('${esc(it.d)}')"></div>${img}${hit}</div>`;
+    }).join('') + (CB.items.length > 1
+      ? `<button type="button" class="cb-nav prev" aria-label="Banner sebelumnya">&lsaquo;</button><button type="button" class="cb-nav next" aria-label="Banner berikutnya">&rsaquo;</button><div class="cb-dots">${CB.items.map((it, k) => `<button type="button" data-dot="${k}" aria-label="Banner ${k + 1}" aria-current="${k === 0}"></button>`).join('')}</div>`
+      : '');
+    $('campaign').hidden = false;
+    sizeBanner(); bannerGo(0); bannerAuto();
+    $('cb').querySelectorAll('img').forEach(im => im.addEventListener('error', () => { const s = im.closest('.cb-slide'); if(s) s.style.display = 'none'; }));
+  }
+  $('cb').addEventListener('click', e => {
+    const d = e.target.closest('[data-dot]'); if(d){ bannerGo(Number(d.dataset.dot)); bannerAuto(); return; }
+    if(e.target.closest('.cb-nav.prev')){ bannerGo(CB.i - 1); bannerAuto(); return; }
+    if(e.target.closest('.cb-nav.next')){ bannerGo(CB.i + 1); bannerAuto(); return; }
+    const hit = e.target.closest('.cb-hit'); if(hit) bannerAction(CB.items[Number(hit.dataset.cb)]);
+    const a = e.target.closest('.cb-slide a'); if(a) track('search', {q: 'banner: ' + (CB.items[CB.i].alt || CB.items[CB.i].id), r: 0, src: 'banner'});
+  });
+  $('cb').addEventListener('mouseenter', () => CB.paused = true);
+  $('cb').addEventListener('mouseleave', () => CB.paused = false);
+  (function(){
+    let x0 = null;
+    $('cb').addEventListener('touchstart', e => { x0 = e.touches[0].clientX; CB.paused = true; }, {passive: true});
+    $('cb').addEventListener('touchend', e => {
+      CB.paused = false;
+      if(x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if(Math.abs(dx) > 40){ bannerGo(CB.i + (dx < 0 ? 1 : -1)); bannerAuto(); }
+    });
+  })();
+  window.addEventListener('resize', sizeBanner);
+  loadBanners();
 
   // ---------- toko ----------
   function setStore(si, scroll){
