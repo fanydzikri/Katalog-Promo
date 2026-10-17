@@ -193,28 +193,122 @@
   .chk input{accent-color:var(--orange);width:16px;height:16px;}
   @media (max-width:700px){ .bn-add,.bn-prev{grid-template-columns:1fr;} .bn-row{grid-template-columns:1fr;} .bn-thumb{width:100%;height:120px;} }
 
+  /* ---------- Kunci password ---------- */
+  body.locked > :not(#lock):not(script){display:none !important;}
+  body:not(.locked) #lock{display:none;}
+  .lock{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--navy);}
+  .lock-card{width:min(400px,100%);background:#fff;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(5,14,45,.35);}
+  .lock-card h1{margin:4px 0 0;font-size:22px;color:var(--navy-ink);}
+  .lock-card p{margin:0;color:var(--ink-soft);font-size:13.5px;}
+  .lock-card input[type=password]{border:2px solid var(--line-strong);border-radius:10px;padding:12px 14px;font-size:16px;font-family:inherit;}
+  .lock-card input[type=password]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 4px var(--orange-tint);}
+  .lock-rem{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);}
+  .lock-rem input{accent-color:var(--orange);width:16px;height:16px;}
+  .lock-card .status{margin:0;}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  .brandbar .logout{margin-left:8px;font-size:13px;font-weight:700;color:var(--orange-deep);background:var(--orange-tint);border:none;border-radius:999px;padding:7px 14px;cursor:pointer;font-family:inherit;}
+  .brandbar .logout:hover{background:var(--orange);color:#fff;}
+
   footer{border-top:1px solid var(--line);background:var(--panel);color:var(--ink-soft);font-size:12px;}
   footer .wrap{padding-top:16px;padding-bottom:18px;}
   footer strong{color:var(--navy);}
 
+  .t-m{display:none;}
   @media (max-width:700px){
+    body{font-size:14px;}
     .wrap{padding:0 14px;}
-    .hero h1{font-size:24px;}
-    .step{grid-template-columns:1fr;gap:10px;padding:16px;}
-    .stat-row{grid-template-columns:repeat(2,1fr);}
-    .field input,.field select,.field.wide input{min-width:0;width:100%;}
-    .field{width:100%;}
+    .t-d{display:none;} .t-m{display:inline;}
+    /* header satu baris */
+    .brandbar .wrap{gap:10px;padding-top:10px;padding-bottom:10px;}
+    .brandbar .app{font-size:15px;margin-left:-2px;white-space:nowrap;}
     .brandbar .app small{display:none;}
+    .brandbar a.open{padding:8px 12px;}
+    .brandbar .logout{margin-left:0;padding:8px 12px;}
+    /* hero ringkas */
+    .hero .wrap{padding-top:16px;padding-bottom:20px;}
+    .hero h1{font-size:21px;margin-bottom:6px;}
+    .hero p{font-size:13px;}
+    .flow{display:none;}
+    /* tab rata, semua terlihat */
+    .tabs{margin-bottom:14px;}
+    .tab{flex:1;padding:12px 6px;font-size:14px;text-align:center;}
+    main.wrap{padding-top:16px;}
+    /* kartu langkah */
+    .step{grid-template-columns:32px minmax(0,1fr);gap:12px;padding:14px;margin-bottom:12px;border-radius:12px;}
+    .step-no{width:32px;height:32px;font-size:14px;}
+    .step h2{font-size:16px;margin-top:5px;}
+    .step .desc{font-size:13px;margin-bottom:10px;}
+    .step.ready .desc{display:none;}
+    .dropzone{padding:18px 12px;}
+    .dz-title{font-size:14.5px;}
+    .status{font-size:12.5px;padding:9px 12px;}
+    /* isian & tombol lebar penuh */
+    .row{gap:10px;}
+    .field input,.field select,.field.wide input{min-width:0;width:100%;font-size:16px;}
+    .field{width:100%;}
+    .row > .btn,.actions > .btn,.btn.big{width:100%;justify-content:center;text-align:center;}
+    .btn{padding:11px 14px;}
+    .btn.big{padding:14px;font-size:15px;}
+    .stat-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .stat{padding:12px;}
+    .stat .num{font-size:22px;}
+    /* koneksi GitHub */
+    .gh{padding:14px;}
+    .gh-top{align-items:flex-start;}
+    .gh-top > div{flex:1;min-width:0;}
+    .gh-top .btn{margin-left:0;width:100%;}
+    .gh-title{font-size:14px;overflow-wrap:anywhere;}
+    .gh-sub{font-size:12.5px;}
+    .live{font-size:12px;gap:4px 12px;}
+    .gh-form ol{font-size:13px;padding-left:18px;}
+    /* zone stok */
+    .zones label{font-size:12.5px;padding:8px 10px;}
+    /* analisa */
+    .an-controls{padding:12px;gap:10px;}
+    .an-controls .field{width:100%;}
+    .an-controls .seg{display:flex;flex-wrap:wrap;}
+    .an-controls .seg button{flex:1 1 30%;padding:9px 6px;}
+    .an-controls .spacer{margin-left:0;width:100%;}
+    .an-controls .spacer .btn{flex:1;}
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px;}
+    .kpis > .kpi:last-child:nth-child(odd){grid-column:1 / -1;}
+    .kpi{padding:12px;min-width:0;}
+    .kpi .k-num{font-size:22px;}
+    .card{padding:14px;border-radius:12px;}
+    .card h3{font-size:15px;}
+    .tbl{max-width:100%;}
+    table.mini{font-size:12.5px;}
+    table.mini th,table.mini td{padding:7px 8px;}
+    /* banner */
+    .bn-row .row > .field{width:100%;}
+    .bn-ctl{flex-direction:row;}
+    .bn-ctl .btn{flex:1;width:auto;}
+    .pv-m{margin:0 auto;}
+    footer .wrap{font-size:11.5px;}
   }
 </style>
 </head>
-<body>
+<body class="locked">
+<section class="lock" id="lock" aria-labelledby="lockH">
+  <form class="lock-card" id="lockForm" autocomplete="on">
+    <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="8" fill="#0F3192"/><path d="M12 8h10l3.5 4.5V25h-17V12.5Z" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/><path d="M8.5 12.5h17" stroke="#fff" stroke-width="2.3"/><path d="M21 16a4 4 0 0 1-8 0" fill="none" stroke="#E46636" stroke-width="2.3" stroke-linecap="round"/></svg>
+    <h1 id="lockH">Admin Katalog</h1>
+    <p id="lockMsg">Masukkan password admin untuk melanjutkan.</p>
+    <input type="text" name="username" value="admin" autocomplete="username" hidden>
+    <label for="lockPw" class="sr-only">Password admin</label>
+    <input type="password" id="lockPw" autocomplete="current-password" placeholder="Password admin" required>
+    <label class="lock-rem"><input type="checkbox" id="lockRem"> Ingat di perangkat ini selama 30 hari</label>
+    <button class="btn big" type="submit" id="lockBtn">Masuk</button>
+    <div class="status err" id="lockErr" hidden></div>
+  </form>
+</section>
 
 <header class="brandbar">
   <div class="wrap">
     <svg class="brand-ic" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="8" fill="#0F3192"/><path d="M12 8h10l3.5 4.5V25h-17V12.5Z" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/><path d="M8.5 12.5h17" stroke="#fff" stroke-width="2.3"/><path d="M21 16a4 4 0 0 1-8 0" fill="none" stroke="#E46636" stroke-width="2.3" stroke-linecap="round"/></svg>
-    <div class="app">Admin Katalog Promo<small>Area Jateng 01</small></div>
-    <a class="open" href="index.html" target="_blank" rel="noopener">Buka katalog customer</a>
+    <div class="app">Admin Katalog<small>Area Jateng 01</small></div>
+    <a class="open" href="index.html" target="_blank" rel="noopener"><span class="t-d">Buka katalog customer</span><span class="t-m">Katalog</span></a>
+    <button type="button" class="logout" id="logoutBtn">Keluar</button>
   </div>
 </header>
 
@@ -234,9 +328,9 @@
   </div>
 
   <div class="tabs" role="tablist">
-    <button type="button" class="tab" role="tab" id="tabUpd" aria-selected="true" aria-controls="panelUpdate">Update katalog</button>
-    <button type="button" class="tab" role="tab" id="tabBn" aria-selected="false" aria-controls="panelBanner">Banner promo</button>
-    <button type="button" class="tab" role="tab" id="tabAn" aria-selected="false" aria-controls="panelAnalisa">Analisa pengunjung</button>
+    <button type="button" class="tab" role="tab" id="tabUpd" aria-selected="true" aria-controls="panelUpdate"><span class="t-d">Update katalog</span><span class="t-m">Katalog</span></button>
+    <button type="button" class="tab" role="tab" id="tabBn" aria-selected="false" aria-controls="panelBanner"><span class="t-d">Banner promo</span><span class="t-m">Banner</span></button>
+    <button type="button" class="tab" role="tab" id="tabAn" aria-selected="false" aria-controls="panelAnalisa"><span class="t-d">Analisa pengunjung</span><span class="t-m">Analisa</span></button>
   </div>
 
   <div id="panelUpdate" role="tabpanel" aria-labelledby="tabUpd">
@@ -425,7 +519,8 @@
         <div class="field wide"><label for="bnAlt">Judul banner (dibaca pembaca layar)</label><input id="bnAlt" type="text" placeholder="Cashback Rp100.000 setiap transaksi min 500K"></div>
         <div class="field"><label for="bnLink">Saat banner diklik</label><select id="bnLink"></select></div>
         <div class="field" id="bnUrlF" hidden><label for="bnUrl">Link</label><input id="bnUrl" type="url" placeholder="https://..."></div>
-        <div class="field"><label for="bnUntil">Tampil sampai (opsional)</label><input id="bnUntil" type="date"></div>
+        <div class="field"><label for="bnFrom">Tayang mulai</label><input id="bnFrom" type="date"></div>
+        <div class="field"><label for="bnUntil">Tayang sampai (opsional)</label><input id="bnUntil" type="date"></div>
         <button class="btn" type="button" id="bnAdd" disabled>Tambahkan ke daftar</button>
       </div>
     </section>
@@ -479,8 +574,76 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-16b';
+  const ADMIN_VERSION = '2026-10-17b';
   let curTab = 'upd';
+
+  // ===================== KUNCI PASSWORD =====================
+  // Password = ADMIN_KEY di Apps Script. Dicek di server Google, bukan di halaman ini.
+  const AUTH_KEY = 'kp_admin_auth';
+  let trackUrlP = null;
+  function trackUrl(){
+    if(!trackUrlP) trackUrlP = fetch('index.html?t=' + Date.now(), {cache: 'no-store'}).then(r => r.text())
+      .then(t => { const m = /const TRACK_URL = '([^']*)'/.exec(t); return m ? m[1].trim() : ''; }).catch(() => '');
+    return trackUrlP;
+  }
+  function storedKey(){
+    try{
+      const s = sessionStorage.getItem(AUTH_KEY); if(s) return s;
+      const l = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null');
+      if(l && l.key && l.exp > Date.now()) return l.key;
+      localStorage.removeItem(AUTH_KEY);
+    }catch(e){}
+    return '';
+  }
+  async function checkKey(key){
+    const url = await trackUrl();
+    if(!url) throw new Error('TRACK_URL belum terpasang di index.html, jadi password belum bisa dicek.');
+    const r = await fetch(url + '?ping=1&key=' + encodeURIComponent(key));
+    const j = await r.json();
+    return !!(j && j.ok);
+  }
+  let adminKey = '';
+  let startAdmin = () => {};
+  function unlock(key){
+    adminKey = key;
+    try{ localStorage.setItem('kp_admin_key', key); }catch(e){}
+    document.body.classList.remove('locked');
+    startAdmin();
+  }
+  (function(){
+    const form = document.getElementById('lockForm'), err = document.getElementById('lockErr'), btn = document.getElementById('lockBtn');
+    const showErr = m => { err.hidden = false; err.innerHTML = m; };
+    const saved = storedKey();
+    if(saved){
+      document.getElementById('lockMsg').textContent = 'Memeriksa sesi login…';
+      btn.disabled = true;
+      checkKey(saved).then(ok => {
+        if(ok) unlock(saved);
+        else { try{ sessionStorage.removeItem(AUTH_KEY); localStorage.removeItem(AUTH_KEY); }catch(e){} document.getElementById('lockMsg').textContent = 'Password sudah diganti. Masukkan password admin yang baru.'; btn.disabled = false; }
+      }).catch(e => { document.getElementById('lockMsg').textContent = 'Masukkan password admin untuk melanjutkan.'; btn.disabled = false; showErr('<b>Tidak bisa memeriksa password.</b> Periksa koneksi internet.'); });
+    }
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const key = document.getElementById('lockPw').value;
+      if(!key) return;
+      err.hidden = true; btn.disabled = true; btn.textContent = 'Memeriksa…';
+      try{
+        if(await checkKey(key)){
+          try{
+            if(document.getElementById('lockRem').checked) localStorage.setItem(AUTH_KEY, JSON.stringify({key, exp: Date.now() + 30 * 864e5}));
+            else sessionStorage.setItem(AUTH_KEY, key);
+          }catch(e){}
+          document.getElementById('lockPw').value = '';
+          unlock(key);
+        }else showErr('<b>Password salah.</b> Gunakan password yang sama dengan ADMIN_KEY di Apps Script.');
+      }catch(e2){ showErr('<b>Tidak bisa memeriksa password.</b> ' + (e2.message || 'Periksa koneksi internet.')); }
+      btn.disabled = false; btn.textContent = 'Masuk';
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      try{ sessionStorage.removeItem(AUTH_KEY); localStorage.removeItem(AUTH_KEY); localStorage.removeItem('kp_admin_key'); }catch(e){}
+      location.href = location.pathname;
+    });
+  })();
 
   const STORE_INFO = {
     '2038': {name:'Kaliurang',          city:'Yogyakarta',  region:'Yogyakarta',     wa:'08112184244'},
@@ -1338,6 +1501,7 @@
     document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="status err"><b>Library Excel gagal dimuat.</b> Periksa koneksi internet lalu muat ulang halaman.</div>');
   }
   $('verTxt').textContent = 'Versi admin ' + ADMIN_VERSION;
+  startAdmin = function(){
   loadMasterJson();
   loadPromoJson();
   loadImgJson();
@@ -1357,6 +1521,10 @@
     setStatus($('ghStatus'), 'warn', `<span><b>Alamat katalog berubah</b> ke ${esc(GH.owner)}/${esc(GH.repo)}. Buat token baru untuk repo ini, lalu klik Hubungkan.</span>`);
   }
   if(GH.token) ghConnect(true);
+  if(location.hash === '#analisa') showTab('an');
+  else if(location.hash === '#banner') showTab('bn');
+  };
+  if(!document.body.classList.contains('locked')) startAdmin();
 
   // ===================== TAB =====================
   function showTab(t){
@@ -1381,7 +1549,15 @@
 
   // ===================== BANNER =====================
   const BN = {items: [], pending: new Map(), removed: [], cats: [], draft: {d: null, m: null}, loaded: false};
-  const BN_MAX = 6;
+  const BN_MAX = 12;
+  const wibToday = () => new Date().toLocaleDateString('sv-SE', {timeZone: 'Asia/Jakarta'});
+  const tglPendek = iso => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}); };
+  function bnState(it, today){
+    if(it.on === false) return ['off', 'Disembunyikan'];
+    if(it.from && it.from > today) return ['next', 'Terjadwal mulai ' + tglPendek(it.from)];
+    if(it.until && it.until < today) return ['done', 'Selesai ' + tglPendek(it.until)];
+    return ['live', it.until ? 'Tayang sampai ' + tglPendek(it.until) : 'Tayang sekarang'];
+  }
   function linkLabel(l){
     if(!l) return 'Tanpa tautan';
     if(l === 'promo') return 'Buka produk promo';
@@ -1405,6 +1581,7 @@
         if(r.ok){ const j = await r.json(); BN.items = Array.isArray(j.items) ? j.items : []; }
       }catch(e){}
       $('bnLink').innerHTML = linkOptions('');
+      $('bnFrom').value = wibToday();
     }
     bnRender();
   }
@@ -1415,20 +1592,26 @@
     const st = $('bnStatus');
     if(!ghReady()) setStatus(st, 'warn', '<span><b>Hubungkan GitHub dulu</b> (tab Update katalog, kotak paling atas) supaya gambar banner bisa diterbitkan langsung ke katalog.</span>');
     else setStatus(st, BN.items.length ? 'ok' : '', BN.items.length ? `<span><b>${BN.items.filter(i => i.on !== false).length} banner aktif</b> dari ${BN.items.length} di daftar. Ubah urutan, tautan, atau status, lalu klik <b>Terbitkan banner</b>.</span>` : '<span>Belum ada banner. Tambahkan banner baru di bawah.</span>');
-    const today = new Date().toISOString().slice(0, 10);
+    const today = wibToday();
+    const cnt = {live: 0, next: 0, done: 0, off: 0};
+    BN.items.forEach(it => cnt[bnState(it, today)[0]]++);
+    if(ghReady() && BN.items.length) setStatus(st, 'ok', `<span><b>${cnt.live} tayang sekarang</b> · ${cnt.next} terjadwal · ${cnt.done} selesai${cnt.off ? ' · ' + cnt.off + ' disembunyikan' : ''}. Banner terjadwal muncul otomatis di tanggal mulainya. Setelah mengubah, klik <b>Terbitkan banner</b>.${cnt.done ? ' <button type="button" class="btn ghost" id="bnClean" style="padding:4px 10px;font-size:12px;margin-left:6px">Hapus yang sudah selesai</button>' : ''}</span>`);
     $('bnList').innerHTML = BN.items.map((it, i) => {
       const src = BN.pending.has(it.d) ? BN.pending.get(it.d).url : it.d;
-      const expired = it.until && it.until < today;
+      const [stt, sttLabel] = bnState(it, today);
+      const expired = stt === 'done';
+      const tagStyle = {live: 'background:var(--teal-bg);color:var(--teal)', next: 'background:var(--navy-tint);color:var(--navy)', done: '', off: 'background:var(--paper);color:var(--ink-soft)'}[stt];
       const isUrl = /^https?:/i.test(it.link || '');
       return `<div class="bn-row${it.on === false || expired ? ' off' : ''}" data-i="${i}">
         ${thumbHtml(src, 'bn-thumb')}
         <div>
-          <div style="font-weight:800;margin-bottom:8px">Banner ${i + 1}${BN.pending.has(it.d) ? '<span class="bn-tag">baru, belum terbit</span>' : ''}${expired ? '<span class="bn-tag">sudah lewat tanggal</span>' : ''}${it.m ? '<span class="bn-tag" style="background:var(--teal-bg);color:var(--teal)">ada versi HP</span>' : ''}</div>
+          <div style="font-weight:800;margin-bottom:8px">Banner ${i + 1}${BN.pending.has(it.d) ? '<span class="bn-tag">baru, belum terbit</span>' : ''}<span class="bn-tag" style="${tagStyle}">${esc(sttLabel)}</span>${it.m ? '<span class="bn-tag" style="background:var(--teal-bg);color:var(--teal)">ada versi HP</span>' : ''}</div>
           <div class="row">
             <div class="field wide"><label>Judul</label><input type="text" data-f="alt" value="${esc(it.alt || '')}"></div>
             <div class="field"><label>Saat diklik</label><select data-f="link">${linkOptions(it.link)}</select></div>
             <div class="field" ${isUrl ? '' : 'hidden'} data-urlf><label>Link</label><input type="url" data-f="url" value="${esc(isUrl ? it.link : '')}"></div>
-            <div class="field"><label>Tampil sampai</label><input type="date" data-f="until" value="${esc(it.until || '')}"></div>
+            <div class="field"><label>Tayang mulai</label><input type="date" data-f="from" value="${esc(it.from || '')}"></div>
+            <div class="field"><label>Tayang sampai</label><input type="date" data-f="until" value="${esc(it.until || '')}"></div>
             <label class="chk"><input type="checkbox" data-f="on" ${it.on !== false ? 'checked' : ''}> Tampilkan</label>
           </div>
         </div>
@@ -1448,6 +1631,17 @@
     if(f === 'alt') it.alt = e.target.value.trim();
     if(f === 'url') it.link = e.target.value.trim();
     if(f === 'until') it.until = e.target.value || undefined;
+    if(f === 'from') it.from = e.target.value || undefined;
+  });
+  $('bnList').addEventListener('change', e => { if(['from', 'until'].includes(e.target.dataset.f)) bnRender(); });
+  $('bnStatus').addEventListener('click', e => {
+    if(e.target.id !== 'bnClean') return;
+    const today = wibToday();
+    const done = BN.items.filter(it => bnState(it, today)[0] === 'done');
+    if(!done.length || !confirm(`Hapus ${done.length} banner yang sudah selesai dari daftar? Berlaku setelah klik Terbitkan banner.`)) return;
+    done.forEach(it => [it.d, it.m].filter(Boolean).forEach(p => { if(BN.pending.has(p)) BN.pending.delete(p); else BN.removed.push(p); }));
+    BN.items = BN.items.filter(it => !done.includes(it));
+    bnRender();
   });
   $('bnList').addEventListener('change', e => {
     const row = e.target.closest('.bn-row'); if(!row) return;
@@ -1512,10 +1706,13 @@
     BN.pending.set(it.d, d);
     if(BN.draft.m){ it.m = `banner/${id}-m.jpg`; it.mw = BN.draft.m.w; it.mh = BN.draft.m.h; BN.pending.set(it.m, BN.draft.m); }
     const lv = $('bnLink').value; it.link = lv === 'url' ? $('bnUrl').value.trim() : lv;
+    if($('bnFrom').value && $('bnFrom').value > wibToday()) it.from = $('bnFrom').value;
     if($('bnUntil').value) it.until = $('bnUntil').value;
+    if(it.from && it.until && it.until < it.from){ alert('Tanggal "Tayang sampai" tidak boleh lebih awal dari "Tayang mulai".'); return; }
     BN.items.unshift(it);
     BN.draft = {d: null, m: null};
     ['bnAlt', 'bnUrl', 'bnUntil'].forEach(id => $(id).value = '');
+    $('bnFrom').value = wibToday();
     $('bnLink').value = ''; $('bnUrlF').hidden = true;
     $('bnInfoD').textContent = 'Dipakai di PC, dan juga di HP bila gambar HP tidak diisi.';
     $('bnInfoM').textContent = 'Disarankan persegi atau tegak, supaya teks terbaca jelas di HP.';
@@ -1542,6 +1739,8 @@
     const st = $('bnPubStatus');
     const bad = BN.items.find(it => /^https?:/i.test(it.link || '') === false && it.link && !['promo', 'utama'].includes(it.link) && !it.link.startsWith('cat:'));
     if(bad){ setStatus(st, 'err', '<b>Ada link yang belum valid.</b> Isi link lengkap yang diawali https://'); return; }
+    const badDate = BN.items.findIndex(it => it.from && it.until && it.until < it.from);
+    if(badDate >= 0){ setStatus(st, 'err', `<b>Tanggal banner ${badDate + 1} tidak valid.</b> "Tayang sampai" lebih awal dari "Tayang mulai".`); return; }
     $('bnPub').disabled = true;
     try{
       const pend = [...BN.pending.entries()].filter(([p]) => BN.items.some(it => it.d === p || it.m === p));
@@ -1551,7 +1750,7 @@
         await ghPutB64(path, await blobToB64(img.blob), 'Tambah banner via admin');
       }
       setStatus(st, '', 'Menyimpan banner.json&hellip;');
-      const out = {v: 1, updated: new Date().toISOString(), items: BN.items.map(it => { const o = Object.assign({}, it); if(!o.until) delete o.until; return o; })};
+      const out = {v: 1, updated: new Date().toISOString(), items: BN.items.map(it => { const o = Object.assign({}, it); if(!o.until) delete o.until; if(!o.from) delete o.from; return o; })};
       await ghPutB64('banner.json', b64(JSON.stringify(out)), 'Update banner via admin');
       BN.pending.clear();
       const rm = BN.removed.splice(0);
@@ -1587,12 +1786,8 @@
   async function anInit(){
     if(anInit.started) return;
     anInit.started = true;
-    try{
-      const t = await (await fetch('index.html?t=' + Date.now(), {cache: 'no-store'})).text();
-      const m = /const TRACK_URL = '([^']*)'/.exec(t);
-      AN.url = m ? m[1].trim() : '';
-    }catch(e){}
-    try{ AN.key = localStorage.getItem('kp_admin_key') || ''; }catch(e){}
+    AN.url = await trackUrl();
+    AN.key = adminKey;
     try{
       const k = await (await fetch('katalog.json?t=' + Date.now(), {cache: 'no-store'})).json();
       AN.stores = k.stores || [];
@@ -1865,8 +2060,6 @@
   $('anStore').addEventListener('change', e => { AN.store = e.target.value; if(AN.loaded) anRender(); });
   $('anReload').addEventListener('click', anLoad);
   $('anExport').addEventListener('click', anExport);
-  if(location.hash === '#analisa') showTab('an');
-  else if(location.hash === '#banner') showTab('bn');
 })();
 </script>
 </body>
