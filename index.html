@@ -1842,8 +1842,9 @@
       const res = await fetch('banner.json?t=' + Math.floor(Date.now() / 60000), {cache: 'no-cache'});
       if(res.ok) j = await res.json();
     }catch(e){}
-    const now = new Date().toISOString().slice(0, 10);
-    CB.items = (j && Array.isArray(j.items) ? j.items : []).filter(it => it && it.on !== false && it.d && (!it.until || it.until >= now));
+    const now = new Date().toLocaleDateString('sv-SE', {timeZone: 'Asia/Jakarta'});
+    // tayang hanya dalam rentang jadwal (tanggal WIB)
+    CB.items = (j && Array.isArray(j.items) ? j.items : []).filter(it => it && it.on !== false && it.d && (!it.from || it.from <= now) && (!it.until || it.until >= now));
     if(!CB.items.length){ $('campaign').hidden = true; return; }
     const ext = l => /^https?:\/\//i.test(l || '');
     $('cb').innerHTML = CB.items.map((it, k) => {
