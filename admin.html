@@ -574,7 +574,7 @@
   // ===== Nama toko untuk customer. Tambah/ubah di sini bila ada toko baru. =====
   // region dipakai untuk mengelompokkan pilihan toko di halaman customer.
   // Naikkan setiap kali admin.html diperbarui. Dipakai untuk mendeteksi halaman admin lama di cache browser.
-  const ADMIN_VERSION = '2026-10-17b';
+  const ADMIN_VERSION = '2026-10-17c';
   let curTab = 'upd';
 
   // ===================== KUNCI PASSWORD =====================
@@ -1576,14 +1576,27 @@
     if(!BN.loaded){
       BN.loaded = true;
       try{ const k = await (await fetch('katalog.json?t=' + Date.now(), {cache: 'no-store'})).json(); BN.cats = [...new Set((k.items || []).map(i => String(i.l3 || '').toUpperCase()).filter(Boolean))]; }catch(e){}
-      try{
-        const r = await fetch('banner.json?t=' + Date.now(), {cache: 'no-store'});
-        if(r.ok){ const j = await r.json(); BN.items = Array.isArray(j.items) ? j.items : []; }
-      }catch(e){}
+      // baca langsung dari repo GitHub (selalu terbaru); GitHub Pages butuh 1-2 menit untuk memperbarui
+      let j = null;
+      if(GH.token && GH.owner && GH.repo){
+        try{
+          const r = await fetch(`${GH_API}/repos/${GH.owner}/${GH.repo}/contents/banner.json?ref=${encodeURIComponent(GH.branch)}&t=${Date.now()}`,
+            {headers: {'Authorization': 'Bearer ' + GH.token, 'Accept': 'application/vnd.github.raw', 'X-GitHub-Api-Version': '2022-11-28'}, cache: 'no-store'});
+          if(r.ok){ j = JSON.parse(await r.text()); BN.fromRepo = true; }
+        }catch(e){}
+      }
+      if(!j){
+        try{ const r = await fetch('banner.json?t=' + Date.now(), {cache: 'no-store'}); if(r.ok) j = await r.json(); }catch(e){}
+      }
+      BN.items = j && Array.isArray(j.items) ? j.items : [];
       $('bnLink').innerHTML = linkOptions('');
       $('bnFrom').value = wibToday();
     }
     bnRender();
+  }
+  function bnSrc(path){
+    if(!BN.fromRepo || /^(https?:|blob:|data:)/.test(path)) return path;
+    return `https://raw.githubusercontent.com/${GH.owner}/${GH.repo}/${encodeURIComponent(GH.branch)}/${path}`;
   }
   function thumbHtml(src, cls, h){
     return `<div class="${cls}"${h ? ` style="height:${h}px"` : ''}><div class="bg" style="background-image:url('${esc(src)}')"></div><img src="${esc(src)}" alt=""></div>`;
@@ -1597,7 +1610,7 @@
     BN.items.forEach(it => cnt[bnState(it, today)[0]]++);
     if(ghReady() && BN.items.length) setStatus(st, 'ok', `<span><b>${cnt.live} tayang sekarang</b> · ${cnt.next} terjadwal · ${cnt.done} selesai${cnt.off ? ' · ' + cnt.off + ' disembunyikan' : ''}. Banner terjadwal muncul otomatis di tanggal mulainya. Setelah mengubah, klik <b>Terbitkan banner</b>.${cnt.done ? ' <button type="button" class="btn ghost" id="bnClean" style="padding:4px 10px;font-size:12px;margin-left:6px">Hapus yang sudah selesai</button>' : ''}</span>`);
     $('bnList').innerHTML = BN.items.map((it, i) => {
-      const src = BN.pending.has(it.d) ? BN.pending.get(it.d).url : it.d;
+      const src = BN.pending.has(it.d) ? BN.pending.get(it.d).url : bnSrc(it.d);
       const [stt, sttLabel] = bnState(it, today);
       const expired = stt === 'done';
       const tagStyle = {live: 'background:var(--teal-bg);color:var(--teal)', next: 'background:var(--navy-tint);color:var(--navy)', done: '', off: 'background:var(--paper);color:var(--ink-soft)'}[stt];
@@ -1755,7 +1768,8 @@
       BN.pending.clear();
       const rm = BN.removed.splice(0);
       for(const p of rm){ setStatus(st, '', 'Menghapus gambar lama&hellip;'); await ghDelete(p, 'Hapus banner via admin'); }
-      setStatus(st, 'ok', `<span><b>Banner terbit.</b> Halaman customer berubah dalam 1&ndash;2 menit. <a href="index.html" target="_blank" rel="noopener">Buka katalog</a></span>`);
+      BN.fromRepo = true;
+      setStatus(st, 'ok', `<span><b>Banner tersimpan di GitHub.</b> Halaman customer diperbarui dalam 1&ndash;2 menit. Banner terjadwal otomatis muncul di tanggal mulainya. <a href="index.html" target="_blank" rel="noopener">Buka katalog</a></span>`);
     }catch(e){
       setStatus(st, 'err', '<b>Gagal menerbitkan banner.</b> ' + esc(ghErrText(e)));
     }
